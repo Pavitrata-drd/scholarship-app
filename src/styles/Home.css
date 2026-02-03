@@ -1,0 +1,160 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* MAIN SECTION */
+.home {
+  position: relative;
+  min-height: 100vh;
+  padding: 120px 100px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LEFT CONTENT */
+.home-content {
+  max-width: 520px;
+}
+
+.home h1 {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.home h1 span {
+  color: #ffd966;
+}
+
+.home p {
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+/* BUTTONS */
+.buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 16px;
+}
+
+.primary-btn {
+  background: #4f46e5;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* RIGHT STATS */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stat-box {
+  background: white;
+  color: #333;
+  padding: 16px 22px;
+  border-radius: 14px;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+}
+
+/* FLOATING BUBBLES */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 40px rgba(255,255,255,0.15);
+  animation: float 18s ease-in-out infinite;
+}
+
+
+
+/* Existing */
+.b1 {
+  width: 240px;
+  height: 240px;
+  left: 6%;
+  bottom: 12%;
+}
+
+.b2 {
+  width: 320px;
+  height: 320px;
+  right: 6%;
+  top: 18%;
+  animation-duration: 20s;
+}
+
+.b3 {
+  width: 180px;
+  height: 180px;
+  right: 28%;
+  bottom: 12%;
+  animation-duration: 18s;
+}
+
+/* NEW bubbles (attraction boost) */
+.b4 {
+  width: 140px;
+  height: 140px;
+  left: 42%;
+  top: 16%;
+  animation-duration: 22s;
+}
+
+.b5 {
+  width: 120px;
+  height: 120px;
+  right: 18%;
+  bottom: 28%;
+  animation-duration: 24s;
+}
+
+.b1 { opacity: 0.25; }
+.b2 { opacity: 0.18; }
+.b3 { opacity: 0.22; }
+.b4 { opacity: 0.15; }
+.b5 { opacity: 0.20; }
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-40px) translateX(20px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
