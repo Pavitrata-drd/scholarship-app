@@ -1,12 +1,12 @@
-const StudentDashboard = () => {
-  return (
-    <div>
-      <h2>Welcome, Student</h2>
-      <p>Apply for scholarships and track your applications.</p>
+import React from "react";
 
-      <button className="button">Apply for Scholarship</button>
+function StudentDashboard() {
+  return (
+    <div style={{ padding: "40px" }}>
+      <h1>🎓 Student Dashboard</h1>
+      <p>Welcome! You can view and apply scholarships here.</p>
     </div>
   );
-};
+}
 
 export default StudentDashboard;
