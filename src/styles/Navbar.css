@@ -1,54 +1,63 @@
+/* Navbar container */
 .navbar {
-  background: white;
+  background: #ffffff;          /* White box background */
   padding: 16px 40px;
-  border-bottom: 1px solid #eee;
+  border-bottom: none;         /* removes the white line */
+  position: relative;          /* IMPORTANT: NOT absolute */
+  width: 100%;
+  z-index: 1000;
 }
 
+/* wrapper */
 .nav-wrapper {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
+/* logo */
 .logo {
   font-size: 20px;
   font-weight: 700;
   color: #6366f1;
 }
 
+/* menu */
 .nav-menu {
   list-style: none;
   display: flex;
-  gap: 20px;
+  gap: 28px;
   margin: 0;
   padding: 0;
 }
 
+/* links */
 .nav-link {
   text-decoration: none;
   color: #333;
   font-weight: 500;
 }
 
+/* right buttons */
 .nav-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
-.btn {
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
+/* outline button */
 .btn-outline {
   border: 2px solid #6366f1;
   background: transparent;
   color: #6366f1;
+  padding: 8px 14px;
+  border-radius: 6px;
 }
 
+/* primary button */
 .btn-primary {
   background: #6366f1;
   color: white;
   border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
 }

@@ -1,64 +1,94 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import axios from "axios";
+import "../styles/Login.css";
 
 function Login() {
-  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    // temporary (backend later)
-    navigate("/student");
+  const handleLogin = async () => {
+
+    try {
+
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password
+      });
+
+      alert("Login successful");
+
+      // save token
+      localStorage.setItem("token", res.data.token);
+
+      // redirect
+      window.location.href = "/student-dashboard";
+
+    } catch (error) {
+
+      alert("Invalid email or password");
+
+    }
+
   };
 
+
   return (
-    <div style={{
-      display: "flex",
-      height: "100vh",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "#f3f4f6"
-    }}>
-      <form
-        onSubmit={handleLogin}
-        style={{
-          background: "white",
-          padding: "40px",
-          borderRadius: "10px",
-          width: "300px",
-          boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
-        }}
-      >
-        <h2 style={{ marginBottom: "20px" }}>Student Login</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          style={{ width: "100%", marginBottom: "12px", padding: "8px" }}
-        />
+    <div className="login-page">
 
-        <input
-          type="password"
-          placeholder="Password"
-          required
-          style={{ width: "100%", marginBottom: "20px", padding: "8px" }}
-        />
+      <div className="login-glass-container">
 
-        <button
-          style={{
-            width: "100%",
-            background: "#6366f1",
-            color: "white",
-            padding: "10px",
-            border: "none",
-            borderRadius: "6px"
-          }}
-        >
-          Login
-        </button>
-      </form>
+        <div className="login-card">
+
+          <div className="login-left">
+            <h2>Welcome Back 👋</h2>
+            <p>Login with your personal information</p>
+          </div>
+
+
+          <div className="login-right">
+
+            <h2>Login</h2>
+
+            <input
+              type="email"
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <button onClick={handleLogin}>
+              SIGN IN
+            </button>
+
+            <p>
+              Forgot password?
+              <span onClick={() => window.location.href="/forgot"}>
+                Reset
+              </span>
+            </p>
+
+            <p>
+              New student?
+              <span onClick={() => window.location.href="/register"}>
+                Register
+              </span>
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
+
   );
 }
 
