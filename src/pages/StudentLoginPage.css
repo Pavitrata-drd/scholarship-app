@@ -1,0 +1,135 @@
+.login-page {
+  font-family: Arial;
+  background: #f5f7fa;
+}
+
+
+/* HEADER */
+
+.header {
+  background: white;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 40px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo img {
+  width: 40px;
+}
+
+.helpdesk {
+  font-weight: bold;
+}
+
+
+.header-banner {
+  background: #f06277;
+  padding: 20px;
+}
+
+.header-banner img {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+}
+
+
+
+/* LOGIN CONTAINER */
+
+.login-container {
+  display: flex;
+  gap: 50px;
+  padding: 40px;
+}
+
+
+/* FORM */
+
+.login-form {
+  width: 400px;
+  background: white;
+  padding: 25px;
+  border-radius: 6px;
+}
+
+.login-form label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.aadhaar-row {
+  display: flex;
+  gap: 10px;
+}
+
+.otp-btn {
+  background: #555;
+  color: white;
+  border: none;
+  padding: 10px;
+}
+
+.otp-boxes {
+  display: flex;
+  gap: 10px;
+}
+
+.otp-boxes input {
+  width: 40px;
+  text-align: center;
+}
+
+
+.captcha {
+  background: #eee;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  letter-spacing: 4px;
+}
+
+
+.proceed-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #555;
+  color: white;
+  border: none;
+}
+
+
+
+/* TIPS */
+
+.tips {
+  width: 400px;
+  background: white;
+  padding: 25px;
+  border-radius: 6px;
+}
+
+.tips ul {
+  padding-left: 20px;
+}
+
+.tips li {
+  margin-bottom: 10px;
+}

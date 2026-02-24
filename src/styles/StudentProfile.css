@@ -1,0 +1,61 @@
+.profile-container {
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 40px;
+}
+
+.profile-card {
+
+  width: 400px;
+
+  background: white;
+
+  padding: 25px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 5px;
+}
+
+.profile-card h2 {
+
+  margin-bottom: 20px;
+}
+
+.profile-card label {
+
+  display: block;
+  margin-top: 15px;
+}
+
+.profile-card input,
+.profile-card select {
+
+  width: 100%;
+
+  padding: 8px;
+
+  margin-top: 5px;
+
+  border: 1px solid #ccc;
+}
+
+.save-btn {
+
+  width: 100%;
+
+  margin-top: 20px;
+
+  padding: 10px;
+
+  background: #1976d2;
+
+  color: white;
+
+  border: none;
+
+  cursor: pointer;
+}

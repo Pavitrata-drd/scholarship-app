@@ -11,78 +11,66 @@ export default function StudentDashboard() {
     address: "",
     gender: "",
     dob: "",
-    aadhaar: "",
+    aadhaar: ""
   });
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [generatedOtp, setGeneratedOtp] = useState(""); // REAL OTP
   const [captcha, setCaptcha] = useState("");
   const [userCaptcha, setUserCaptcha] = useState("");
 
   // Generate captcha
   const generateCaptcha = () => {
-
     const chars =
       "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 
-    let newCaptcha = "";
+    let result = "";
 
     for (let i = 0; i < 6; i++) {
-
-      newCaptcha += chars.charAt(
+      result += chars.charAt(
         Math.floor(Math.random() * chars.length)
       );
     }
 
-    setCaptcha(newCaptcha);
+    setCaptcha(result);
   };
 
   useEffect(() => {
     generateCaptcha();
   }, []);
 
-  // Generate REAL OTP (demo)
-  const generateOtp = () => {
-
-    if (form.aadhaar.length !== 12) {
-      alert("Enter valid 12-digit Aadhaar first");
-      return;
-    }
-
-    const newOtp =
-      Math.floor(100000 + Math.random() * 900000).toString();
-
-    setGeneratedOtp(newOtp);
-
-    alert("Demo OTP is: " + newOtp);
-  };
-
-  // Handle input change
+  // handle input change
   const handleChange = (e) => {
-
-    const { name, value } = e.target;
-
     setForm({
       ...form,
-      [name]: value,
+      [e.target.name]: e.target.value
     });
   };
 
-  // Aadhaar validation
-  const handleAadhaar = (e) => {
-
+  // name validation
+  const handleName = (e) => {
     const value = e.target.value;
-
-    if (/^[0-9]*$/.test(value) && value.length <= 12) {
-
-      setForm({
-        ...form,
-        aadhaar: value,
-      });
+    if (/^[A-Za-z ]*$/.test(value)) {
+      setForm({ ...form, name: value });
     }
   };
 
-  // OTP input handler
+  // phone validation
+  const handlePhone = (e) => {
+    const value = e.target.value;
+    if (/^[0-9]*$/.test(value) && value.length <= 10) {
+      setForm({ ...form, phone: value });
+    }
+  };
+
+  // aadhaar validation
+  const handleAadhaar = (e) => {
+    const value = e.target.value;
+    if (/^[0-9]*$/.test(value) && value.length <= 12) {
+      setForm({ ...form, aadhaar: value });
+    }
+  };
+
+  // OTP handler
   const handleOtpChange = (value, index) => {
 
     if (!/^[0-9]?$/.test(value)) return;
@@ -90,64 +78,54 @@ export default function StudentDashboard() {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`).focus();
+    }
   };
 
-  // Validation
-  const validate = () => {
+  // Submit validation
+  const handleSubmit = () => {
 
-    if (!/^[A-Za-z ]+$/.test(form.name)) {
-      alert("Name must contain only letters");
-      return false;
-    }
-
-    if (!/^[0-9]{10}$/.test(form.phone)) {
-      alert("Phone must be 10 digits");
-      return false;
-    }
-
-    if (!/^[0-9]{12}$/.test(form.aadhaar)) {
-      alert("Aadhaar must be 12 digits");
-      return false;
-    }
-
-    if (!form.course ||
-        !form.college ||
-        !form.address ||
-        !form.gender ||
-        !form.dob) {
-
+    if (
+      !form.name ||
+      !form.phone ||
+      !form.course ||
+      !form.college ||
+      !form.address ||
+      !form.gender ||
+      !form.dob ||
+      !form.aadhaar
+    ) {
       alert("All fields are mandatory");
-      return false;
+      return;
     }
 
-    // REAL OTP VALIDATION
-    if (otp.join("") !== generatedOtp) {
-      alert("Invalid OTP");
-      return false;
+    if (form.phone.length !== 10) {
+      alert("Phone must be 10 digits");
+      return;
+    }
+
+    if (form.aadhaar.length !== 12) {
+      alert("Aadhaar must be 12 digits");
+      return;
+    }
+
+    if (otp.join("").length !== 6) {
+      alert("Enter complete OTP");
+      return;
     }
 
     if (userCaptcha !== captcha) {
       alert("Invalid captcha");
       generateCaptcha();
-      return false;
+      return;
     }
 
-    return true;
-  };
-
-  // Submit
-  const handleSubmit = () => {
-
-    if (!validate()) return;
-
-alert("Registration Successful");
-
-window.location.href = "/student-profile";
-    generateCaptcha();
+    alert("Registration Successful");
   };
 
   return (
-
     <div className="student-container">
 
       <h2>Students</h2>
@@ -157,19 +135,18 @@ window.location.href = "/student-profile";
         {/* LEFT FORM */}
         <div className="form-section">
 
+          <h3>Application Form</h3>
+
           <label>Full Name *</label>
           <input
-            name="name"
             value={form.name}
-            onChange={handleChange}
+            onChange={handleName}
           />
 
           <label>Phone Number *</label>
           <input
-            name="phone"
             value={form.phone}
-            onChange={handleChange}
-            maxLength="10"
+            onChange={handlePhone}
           />
 
           <label>Course *</label>
@@ -219,38 +196,13 @@ window.location.href = "/student-profile";
             onChange={handleChange}
           />
 
-          {/* Aadhaar */}
           <label>Aadhaar Number *</label>
+          <input
+            value={form.aadhaar}
+            onChange={handleAadhaar}
+          />
 
-          <div className="aadhaar-row">
-
-            <input
-              type="text"
-              placeholder="Enter Aadhaar Number"
-              value={form.aadhaar}
-              onChange={handleAadhaar}
-              maxLength="12"
-            />
-
-            <button
-              type="button"
-              className="get-otp-btn"
-              onClick={generateOtp}
-            >
-              Get OTP
-            </button>
-
-          </div>
-
-          {/* Show OTP (demo only) */}
-          {generatedOtp && (
-            <p style={{color:"green"}}>
-              Demo OTP: {generatedOtp}
-            </p>
-          )}
-
-          {/* OTP BOXES */}
-          <label>OTP *</label>
+          <label>Enter OTP *</label>
 
           <div className="otp-box">
 
@@ -258,6 +210,7 @@ window.location.href = "/student-profile";
 
               <input
                 key={index}
+                id={`otp-${index}`}
                 maxLength="1"
                 value={digit}
                 onChange={(e) =>
@@ -272,7 +225,6 @@ window.location.href = "/student-profile";
 
           </div>
 
-          {/* Captcha */}
           <label>Captcha *</label>
 
           <div className="captcha-box">
@@ -282,7 +234,7 @@ window.location.href = "/student-profile";
             </span>
 
             <button
-              type="button"
+              className="refresh-btn"
               onClick={generateCaptcha}
             >
               ↻
@@ -291,7 +243,7 @@ window.location.href = "/student-profile";
           </div>
 
           <input
-            placeholder="Enter Captcha"
+            placeholder="Enter captcha"
             value={userCaptcha}
             onChange={(e) =>
               setUserCaptcha(e.target.value)
@@ -313,13 +265,35 @@ window.location.href = "/student-profile";
           <h3>Student Login Tips</h3>
 
           <ul>
-            <li>Read instructions carefully.</li>
-            <li>Fill all required details correctly.</li>
-            <li>Incorrect info may lead to rejection.</li>
-            <li>Check details before submission.</li>
-            <li>Keep your account secure.</li>
-            <li>Do not share password.</li>
-            <li>Use correct Aadhaar and OTP.</li>
+
+            <li>
+              Student must read instructions carefully.
+            </li>
+
+            <li>
+              Fill all required details carefully.
+            </li>
+
+            <li>
+              Incorrect information may lead to rejection.
+            </li>
+
+            <li>
+              Check details before submission.
+            </li>
+
+            <li>
+              Keep your account secure.
+            </li>
+
+            <li>
+              Do not share password.
+            </li>
+
+            <li>
+              Use correct Aadhaar and OTP.
+            </li>
+
           </ul>
 
         </div>

@@ -8,6 +8,9 @@ import ScholarshipList from "./pages/ScholarshipList";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Register from "./pages/Register";
+import StudentPortal from "./pages/StudentPortal";
+import StudentLogin from "./pages/StudentLoginPage";
+import StudentProfile from "./pages/StudentProfile";
 
 function App() {
   return (
@@ -29,6 +32,12 @@ function App() {
         <Route path="/scholarships" element={<ScholarshipList />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
+
+        <Route path="/portal" element={<StudentPortal/>} />
+
+        <Route path="/student-login" element={<StudentLogin />} />
+
+        <Route path="/student-profile" element={<StudentProfile />} />
 
       </Routes>
 
