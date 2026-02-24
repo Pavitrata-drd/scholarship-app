@@ -1,6 +1,5 @@
 import React from "react";
-import "../styles/StudentPortal.css";
-
+import "../styles/StudentPortal.css"; 
 function StudentPortal(){
 
 return(
