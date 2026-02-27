@@ -6,9 +6,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="nav-wrapper">
-        <div className="logo">
-          🎓 ScholarHub
-        </div>
+        <div className="logo">ScholarHub</div>
 
         <ul className="nav-menu">
           <li><Link className="nav-link" to="/">Home</Link></li>

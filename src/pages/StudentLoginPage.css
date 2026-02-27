@@ -133,3 +133,27 @@
 .tips li {
   margin-bottom: 10px;
 }
+
+:root[data-theme="dark"] .login-page {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .header,
+:root[data-theme="dark"] .login-form,
+:root[data-theme="dark"] .tips {
+  background: var(--surface-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .login-form input,
+:root[data-theme="dark"] .aadhaar-row input,
+:root[data-theme="dark"] .otp-boxes input {
+  background: var(--surface-muted);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .captcha {
+  background: var(--surface-muted);
+}

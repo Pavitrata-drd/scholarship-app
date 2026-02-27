@@ -117,3 +117,26 @@
   margin-bottom: 10px;
   font-size: 14px;
 }
+
+:root[data-theme="dark"] .student-container {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .student-card {
+  background: var(--surface-color);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .form-section input,
+:root[data-theme="dark"] .form-section select,
+:root[data-theme="dark"] .form-section textarea,
+:root[data-theme="dark"] .otp-box input {
+  background: var(--surface-muted);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .captcha-text {
+  background: var(--surface-muted);
+}

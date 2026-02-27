@@ -1,9 +1,9 @@
 /* Navbar container */
 .navbar {
-  background: #ffffff;          /* White box background */
+  background: var(--surface-color);
   padding: 16px 40px;
-  border-bottom: none;         /* removes the white line */
-  position: relative;          /* IMPORTANT: NOT absolute */
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
   width: 100%;
   z-index: 1000;
 }
@@ -19,7 +19,7 @@
 .logo {
   font-size: 20px;
   font-weight: 700;
-  color: #6366f1;
+  color: var(--accent-color);
 }
 
 /* menu */
@@ -34,28 +34,29 @@
 /* links */
 .nav-link {
   text-decoration: none;
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
 /* right buttons */
 .nav-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
 /* outline button */
 .btn-outline {
-  border: 2px solid #6366f1;
+  border: 2px solid var(--accent-color);
   background: transparent;
-  color: #6366f1;
+  color: var(--accent-color);
   padding: 8px 14px;
   border-radius: 6px;
 }
 
 /* primary button */
 .btn-primary {
-  background: #6366f1;
+  background: var(--accent-color);
   color: white;
   border: none;
   padding: 8px 14px;

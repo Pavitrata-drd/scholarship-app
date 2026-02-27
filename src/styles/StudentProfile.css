@@ -59,3 +59,16 @@
 
   cursor: pointer;
 }
+
+:root[data-theme="dark"] .profile-card {
+  background: var(--surface-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .profile-card input,
+:root[data-theme="dark"] .profile-card select {
+  background: var(--surface-muted);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}

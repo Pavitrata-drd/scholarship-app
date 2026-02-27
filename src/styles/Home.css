@@ -158,3 +158,36 @@
     transform: translateY(0) translateX(0);
   }
 }
+
+:root[data-theme="dark"] .home {
+  background: linear-gradient(135deg, #2b3f66, #4b3f86);
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] .home h1 span {
+  color: #facc15;
+}
+
+:root[data-theme="dark"] .home p {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .primary-btn {
+  background: #4f46e5;
+}
+
+:root[data-theme="dark"] .secondary-btn {
+  border-color: #cbd5e1;
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] .stat-box {
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .bubble {
+  background: rgba(255, 255, 255, 0.08);
+}
