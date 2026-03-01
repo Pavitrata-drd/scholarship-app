@@ -4,34 +4,38 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { CalendarDays, IndianRupee, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays } from "date-fns";
 
 const deadlineColor = (deadline: string) => {
   const days = differenceInDays(new Date(deadline), new Date());
-  if (days <= 7) return "bg-scholar-danger/10 text-scholar-danger";
-  if (days <= 30) return "bg-scholar-warning/10 text-scholar-warning";
-  return "bg-scholar-success/10 text-scholar-success";
+  if (days <= 7) return "bg-red-100 text-red-600";
+  if (days <= 30) return "bg-yellow-100 text-yellow-600";
+  return "bg-green-100 text-green-600";
 };
 
-const FeaturedScholarships = () => {
-  const { data: scholarships, isLoading } = useQuery({
-    queryKey: ["featured-scholarships"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("scholarships")
-        .select("*")
-        .eq("is_featured", true)
-        .gte("deadline", new Date().toISOString().split("T")[0])
-        .order("deadline", { ascending: true })
-        .limit(6);
-      if (error) throw error;
-      return data;
-    },
-  });
+// ✅ Dummy data (no backend)
+const FEATURED = [
+  {
+    id: "1",
+    name: "Central Sector Scholarship",
+    provider: "Government of India",
+    amount: 50000,
+    deadline: "2026-05-30",
+    type: "government",
+    eligibility_criteria: ["Undergraduate", "All Categories"],
+  },
+  {
+    id: "2",
+    name: "AICTE Pragati Scholarship",
+    provider: "AICTE",
+    amount: 75000,
+    deadline: "2026-06-15",
+    type: "government",
+    eligibility_criteria: ["Engineering", "Girls Students"],
+  },
+];
 
+const FeaturedScholarships = () => {
   return (
     <section className="py-20">
       <div className="container">
@@ -41,19 +45,17 @@ const FeaturedScholarships = () => {
           viewport={{ once: true }}
           className="mb-12 text-center"
         >
-          <h2 className="text-3xl font-bold sm:text-4xl">Featured Scholarships</h2>
-          <p className="mt-3 text-muted-foreground">Handpicked opportunities you don't want to miss</p>
+          <h2 className="text-3xl font-bold sm:text-4xl">
+            Featured Scholarships
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Handpicked opportunities you don't want to miss
+          </p>
         </motion.div>
 
-        {isLoading ? (
+        {FEATURED.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-64 rounded-xl" />
-            ))}
-          </div>
-        ) : scholarships && scholarships.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {scholarships.map((s, i) => (
+            {FEATURED.map((s, i) => (
               <motion.div
                 key={s.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -65,40 +67,50 @@ const FeaturedScholarships = () => {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-display text-lg font-semibold leading-tight group-hover:text-primary transition-colors">
+                        <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
                           {s.name}
                         </h3>
-                        <p className="mt-1 text-sm text-muted-foreground">{s.provider}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {s.provider}
+                        </p>
                       </div>
-                      <Badge variant="secondary" className="shrink-0 capitalize">
+                      <Badge variant="secondary" className="capitalize">
                         {s.type}
                       </Badge>
                     </div>
                   </CardHeader>
+
                   <CardContent className="space-y-3 pb-3">
                     <div className="flex items-center gap-2 text-sm">
                       <IndianRupee className="h-4 w-4 text-primary" />
-                      <span className="font-semibold">₹{Number(s.amount).toLocaleString("en-IN")}</span>
+                      <span className="font-semibold">
+                        ₹{s.amount.toLocaleString("en-IN")}
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-2 text-sm">
                       <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${deadlineColor(s.deadline)}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${deadlineColor(
+                          s.deadline
+                        )}`}
+                      >
                         {format(new Date(s.deadline), "dd MMM yyyy")}
                       </span>
                     </div>
-                    {s.eligibility_criteria && s.eligibility_criteria.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {s.eligibility_criteria.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {s.eligibility_criteria.map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
                   </CardContent>
+
                   <CardFooter>
                     <Button variant="ghost" size="sm" className="ml-auto gap-1" asChild>
-                      <Link to={`/scholarships/${s.id}`}>
+                      <Link to="/scholarships">
                         View Details <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
