@@ -6,6 +6,7 @@ import {
   Pencil,
   Trash2,
   Users,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,83 +16,101 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQueryClient } from "@tanstack/react-query";
+import { useScholarships, useScholarshipStats } from "@/hooks/useScholarships";
+import {
+  createScholarship,
+  updateScholarship,
+  deleteScholarship,
+  type Scholarship,
+} from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
-type Scholarship = {
-  id: string;
-  name: string;
-  provider: string;
-  description: string;
-  amount: number;
-  deadline: string;
-  type: string;
+const EMPTY: Partial<Scholarship> = {
+  name: "",
+  provider: "",
+  description: "",
+  amount: 0,
+  deadline: "",
+  type: "government",
+  category: null,
+  education_level: null,
+  is_featured: false,
 };
 
 const Admin = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Scholarship | null>(null);
-  const [scholarships, setScholarships] = useState<Scholarship[]>([
-    {
-      id: "1",
-      name: "Central Government Scholarship",
-      provider: "Government of India",
-      description: "For undergraduate students",
-      amount: 50000,
-      deadline: "2026-05-30",
-      type: "government",
-    },
-  ]);
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useScholarships({ limit: 100 });
+  const { data: statsData } = useScholarshipStats();
+  const scholarships = data?.data ?? [];
+  const stats = statsData?.data;
 
-  const emptyScholarship: Scholarship = {
-    id: "",
-    name: "",
-    provider: "",
-    description: "",
-    amount: 0,
-    deadline: "",
-    type: "government",
-  };
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Partial<Scholarship> | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const openCreate = () => {
-    setEditing(emptyScholarship);
+    setEditing({ ...EMPTY });
     setDialogOpen(true);
   };
 
   const openEdit = (s: Scholarship) => {
-    setEditing(s);
+    setEditing({ ...s, deadline: s.deadline?.split("T")[0] ?? "" });
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
-    if (!editing) return;
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["scholarships"] });
+  };
 
+  const handleSave = async () => {
+    if (!editing) return;
     if (!editing.name || !editing.provider) {
       alert("Please fill required fields");
       return;
     }
 
-    if (editing.id) {
-      setScholarships((prev) =>
-        prev.map((s) => (s.id === editing.id ? editing : s))
-      );
-    } else {
-      setScholarships((prev) => [
-        ...prev,
-        { ...editing, id: Date.now().toString() },
-      ]);
+    setSaving(true);
+    try {
+      if (editing.id) {
+        await updateScholarship(editing.id, editing);
+        toast({ title: "Scholarship updated" });
+      } else {
+        await createScholarship(editing);
+        toast({ title: "Scholarship created" });
+      }
+      invalidate();
+      setDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
-
-    setDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    setScholarships((prev) => prev.filter((s) => s.id !== id));
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this scholarship?")) return;
+    try {
+      await deleteScholarship(id);
+      toast({ title: "Scholarship deleted" });
+      invalidate();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
   };
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">
       <div className="flex items-center gap-3">
         <Shield className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Admin Panel (Demo Mode)</h1>
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
       </div>
 
       {/* Stats */}
@@ -100,7 +119,7 @@ const Admin = () => {
           <CardContent className="flex items-center gap-3 p-4">
             <GraduationCap className="h-6 w-6 text-primary" />
             <div>
-              <p className="text-xl font-bold">{scholarships.length}</p>
+              <p className="text-xl font-bold">{stats?.total_scholarships ?? "—"}</p>
               <p className="text-xs text-muted-foreground">Scholarships</p>
             </div>
           </CardContent>
@@ -110,8 +129,8 @@ const Admin = () => {
           <CardContent className="flex items-center gap-3 p-4">
             <Users className="h-6 w-6 text-primary" />
             <div>
-              <p className="text-xl font-bold">0</p>
-              <p className="text-xs text-muted-foreground">Applications</p>
+              <p className="text-xl font-bold">{stats?.active_scholarships ?? "—"}</p>
+              <p className="text-xs text-muted-foreground">Active</p>
             </div>
           </CardContent>
         </Card>
@@ -137,7 +156,7 @@ const Admin = () => {
               <div>
                 <Label>Name *</Label>
                 <Input
-                  value={editing.name}
+                  value={editing.name ?? ""}
                   onChange={(e) =>
                     setEditing({ ...editing, name: e.target.value })
                   }
@@ -147,7 +166,7 @@ const Admin = () => {
               <div>
                 <Label>Provider *</Label>
                 <Input
-                  value={editing.provider}
+                  value={editing.provider ?? ""}
                   onChange={(e) =>
                     setEditing({ ...editing, provider: e.target.value })
                   }
@@ -158,7 +177,7 @@ const Admin = () => {
                 <Label>Amount</Label>
                 <Input
                   type="number"
-                  value={editing.amount}
+                  value={editing.amount ?? 0}
                   onChange={(e) =>
                     setEditing({
                       ...editing,
@@ -172,7 +191,7 @@ const Admin = () => {
                 <Label>Deadline</Label>
                 <Input
                   type="date"
-                  value={editing.deadline}
+                  value={editing.deadline?.split("T")[0] ?? ""}
                   onChange={(e) =>
                     setEditing({ ...editing, deadline: e.target.value })
                   }
@@ -180,9 +199,29 @@ const Admin = () => {
               </div>
 
               <div>
+                <Label>Type</Label>
+                <Select
+                  value={editing.type ?? "government"}
+                  onValueChange={(v) =>
+                    setEditing({ ...editing, type: v as Scholarship["type"] })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="government">Government</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="international">International</SelectItem>
+                    <SelectItem value="university">University</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <Label>Description</Label>
                 <Textarea
-                  value={editing.description}
+                  value={editing.description ?? ""}
                   onChange={(e) =>
                     setEditing({
                       ...editing,
@@ -192,7 +231,8 @@ const Admin = () => {
                 />
               </div>
 
-              <Button onClick={handleSave}>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editing.id ? "Update" : "Create"}
               </Button>
             </div>
@@ -201,34 +241,43 @@ const Admin = () => {
       </Dialog>
 
       {/* Scholarship List */}
-      <div className="space-y-3">
-        {scholarships.map((s) => (
-          <Card key={s.id}>
-            <CardContent className="flex items-center justify-between p-4">
-              <div>
-                <h4 className="font-semibold">{s.name}</h4>
-                <p className="text-xs text-muted-foreground">
-                  {s.provider} · ₹{s.amount}
-                </p>
-                <Badge variant="outline">{s.type}</Badge>
-              </div>
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {scholarships.map((s) => (
+            <Card key={s.id}>
+              <CardContent className="flex items-center justify-between p-4">
+                <div>
+                  <h4 className="font-semibold">{s.name}</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {s.provider} · ₹{Number(s.amount).toLocaleString("en-IN")}
+                  </p>
+                  <div className="mt-1 flex gap-2">
+                    <Badge variant="outline">{s.type}</Badge>
+                    {s.is_featured && <Badge variant="secondary">Featured</Badge>}
+                  </div>
+                </div>
 
-              <div className="flex gap-2">
-                <Button size="icon" variant="ghost" onClick={() => openEdit(s)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleDelete(s.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <div className="flex gap-2">
+                  <Button size="icon" variant="ghost" onClick={() => openEdit(s)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleDelete(s.id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

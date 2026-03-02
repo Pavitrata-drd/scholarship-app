@@ -1,13 +1,28 @@
 import { motion } from "framer-motion";
-import { BookOpen, Users, IndianRupee } from "lucide-react";
-
-const stats = [
-  { icon: BookOpen, label: "Total Scholarships", value: "500+" },
-  { icon: Users, label: "Students Helped", value: "10,000+" },
-  { icon: IndianRupee, label: "Funding Available", value: "₹50 Cr+" },
-];
+import { BookOpen, Users, IndianRupee, Building } from "lucide-react";
+import { useScholarshipStats } from "@/hooks/useScholarships";
 
 const StatsBar = () => {
+  const { data } = useScholarshipStats();
+  const s = data?.data;
+
+  const stats = [
+    {
+      icon: BookOpen,
+      label: "Active Scholarships",
+      value: s ? String(s.active_scholarships) : "—",
+    },
+    {
+      icon: Building,
+      label: "Providers",
+      value: s ? String(s.total_providers) : "—",
+    },
+    {
+      icon: IndianRupee,
+      label: "Total Funding",
+      value: s ? `₹${(s.total_funding / 100000).toFixed(1)} L` : "—",
+    },
+  ];
   return (
     <section className="border-y bg-card py-10">
       <div className="container grid grid-cols-1 gap-8 sm:grid-cols-3">

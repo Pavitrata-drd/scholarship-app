@@ -1,8 +1,17 @@
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <nav className="sticky top-0 z-40 border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
@@ -19,17 +28,40 @@ const Navbar = () => {
 
         {/* Navigation Buttons */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild>
-            <Link to="/scholarships">Scholarships</Link>
-          </Button>
+          {isAuthenticated && (
+            <Button variant="ghost" asChild>
+              <Link to="/scholarships">Scholarships</Link>
+            </Button>
+          )}
 
-          <Button variant="ghost" asChild>
-            <Link to="/admin">Admin</Link>
-          </Button>
+          {isAuthenticated && (
+            <Button variant="ghost" asChild>
+              <Link to="/dashboard">Dashboard</Link>
+            </Button>
+          )}
 
-          <Button asChild>
-            <Link to="/auth">Login</Link>
-          </Button>
+          {isAdmin && (
+            <Button variant="ghost" asChild>
+              <Link to="/admin">
+                <Shield className="mr-1 h-4 w-4" /> Admin
+              </Link>
+            </Button>
+          )}
+
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                {user?.full_name}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-1 h-4 w-4" /> Logout
+              </Button>
+            </div>
+          ) : (
+            <Button asChild>
+              <Link to="/auth">Login</Link>
+            </Button>
+          )}
         </div>
 
       </div>

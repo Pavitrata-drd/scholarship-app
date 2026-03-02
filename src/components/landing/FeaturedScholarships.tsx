@@ -2,9 +2,10 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { CalendarDays, IndianRupee, ArrowRight } from "lucide-react";
+import { CalendarDays, IndianRupee, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
+import { useFeaturedScholarships } from "@/hooks/useScholarships";
 
 const deadlineColor = (deadline: string) => {
   const days = differenceInDays(new Date(deadline), new Date());
@@ -13,29 +14,9 @@ const deadlineColor = (deadline: string) => {
   return "bg-green-100 text-green-600";
 };
 
-// ✅ Dummy data (no backend)
-const FEATURED = [
-  {
-    id: "1",
-    name: "Central Sector Scholarship",
-    provider: "Government of India",
-    amount: 50000,
-    deadline: "2026-05-30",
-    type: "government",
-    eligibility_criteria: ["Undergraduate", "All Categories"],
-  },
-  {
-    id: "2",
-    name: "AICTE Pragati Scholarship",
-    provider: "AICTE",
-    amount: 75000,
-    deadline: "2026-06-15",
-    type: "government",
-    eligibility_criteria: ["Engineering", "Girls Students"],
-  },
-];
-
 const FeaturedScholarships = () => {
+  const { data, isLoading, isError } = useFeaturedScholarships();
+  const scholarships = data?.data ?? [];
   return (
     <section className="py-20">
       <div className="container">
@@ -53,9 +34,15 @@ const FeaturedScholarships = () => {
           </p>
         </motion.div>
 
-        {FEATURED.length > 0 ? (
+        {isLoading && (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+
+        {!isLoading && !isError && scholarships.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURED.map((s, i) => (
+            {scholarships.map((s, i) => (
               <motion.div
                 key={s.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -84,28 +71,32 @@ const FeaturedScholarships = () => {
                     <div className="flex items-center gap-2 text-sm">
                       <IndianRupee className="h-4 w-4 text-primary" />
                       <span className="font-semibold">
-                        ₹{s.amount.toLocaleString("en-IN")}
+                        ₹{Number(s.amount).toLocaleString("en-IN")}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm">
-                      <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${deadlineColor(
-                          s.deadline
-                        )}`}
-                      >
-                        {format(new Date(s.deadline), "dd MMM yyyy")}
-                      </span>
-                    </div>
+                    {s.deadline && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${deadlineColor(
+                            s.deadline
+                          )}`}
+                        >
+                          {format(new Date(s.deadline), "dd MMM yyyy")}
+                        </span>
+                      </div>
+                    )}
 
-                    <div className="flex flex-wrap gap-1.5">
-                      {s.eligibility_criteria.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
+                    {s.eligibility_criteria && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {s.eligibility_criteria.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
 
                   <CardFooter>
@@ -119,11 +110,11 @@ const FeaturedScholarships = () => {
               </motion.div>
             ))}
           </div>
-        ) : (
+        ) : !isLoading ? (
           <div className="py-12 text-center text-muted-foreground">
             <p>Scholarships coming soon! Check back later.</p>
           </div>
-        )}
+        ) : null}
 
         <div className="mt-10 text-center">
           <Button variant="outline" size="lg" asChild>

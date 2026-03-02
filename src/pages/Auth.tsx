@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -29,6 +30,12 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, register, isAuthenticated } = useAuth();
+
+  // If already logged in, redirect away
+  const from = (location.state as any)?.from?.pathname || "/scholarships";
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -40,30 +47,43 @@ const Auth = () => {
     defaultValues: { fullName: "", email: "", password: "" },
   });
 
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    navigate(from, { replace: true });
+  }
+
   const handleLogin = async (values: LoginFormValues) => {
     setIsLoading(true);
-
-    // 🚀 TEMPORARY FAKE LOGIN (UI only)
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await login(values.email, values.password);
+      toast({ title: "Login successful", description: "Welcome back!" });
+      navigate(from, { replace: true });
+    } catch (err: any) {
       toast({
-        title: "Login successful",
-        description: "Backend authentication will be connected soon.",
+        title: "Login failed",
+        description: err.message || "Invalid email or password",
+        variant: "destructive",
       });
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignup = async (values: SignupFormValues) => {
     setIsLoading(true);
-
-    // 🚀 TEMPORARY FAKE SIGNUP
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await register(values.fullName, values.email, values.password);
+      toast({ title: "Account created", description: "Welcome to ScholarHub!" });
+      navigate(from, { replace: true });
+    } catch (err: any) {
       toast({
-        title: "Account created",
-        description: "Backend authentication will be connected soon.",
+        title: "Registration failed",
+        description: err.message || "Could not create account",
+        variant: "destructive",
       });
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
