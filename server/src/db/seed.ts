@@ -414,7 +414,783 @@ const SCHOLARSHIPS = [
       "Commitment to return to India",
     ],
   },
+  {
+    name: "IIT Bombay Merit-cum-Means Scholarship",
+    provider: "Indian Institute of Technology Bombay",
+    description:
+      "University scholarship for undergraduate students at IIT Bombay based on merit and family income criteria.",
+    amount: 100000,
+    deadline: "2026-09-30",
+    type: "university",
+    category: "general",
+    education_level: "undergraduate",
+    stream: "Engineering",
+    state: "Maharashtra",
+    country: "India",
+    official_url: "https://www.iitb.ac.in",
+    is_featured: true,
+    documents_required: [
+      "Institute ID card",
+      "Family income certificate",
+      "Previous semester grade sheet",
+      "Bank account details",
+    ],
+    eligibility_criteria: [
+      "Currently enrolled at IIT Bombay",
+      "Strong academic performance",
+      "Family income as per institute norms",
+    ],
+  },
+  {
+    name: "University of Delhi Need-Based Financial Assistance",
+    provider: "University of Delhi",
+    description:
+      "Financial aid support for eligible University of Delhi students from economically weaker backgrounds.",
+    amount: 75000,
+    deadline: "2026-10-15",
+    type: "university",
+    category: "ews",
+    education_level: "undergraduate",
+    stream: null,
+    state: "Delhi",
+    country: "India",
+    official_url: "https://www.du.ac.in",
+    is_featured: false,
+    documents_required: [
+      "University enrollment proof",
+      "Income certificate",
+      "Previous year marksheet",
+      "Fee receipt",
+    ],
+    eligibility_criteria: [
+      "Enrolled in University of Delhi",
+      "Economically weaker background",
+      "Satisfactory academic record",
+    ],
+  },
+  {
+    name: "National EWS School Scholarship (Class 10)",
+    provider: "Ministry of Education, Government of India",
+    description:
+      "Government scholarship support for EWS students studying in Class 10 in recognized schools.",
+    amount: 18000,
+    deadline: "2026-09-10",
+    type: "government",
+    category: "ews",
+    education_level: "10th",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://scholarships.gov.in",
+    is_featured: false,
+    documents_required: [
+      "Class 9 marksheet",
+      "Income certificate",
+      "School bonafide certificate",
+      "Aadhaar card",
+    ],
+    eligibility_criteria: [
+      "Studying in Class 10",
+      "Family belongs to EWS category",
+      "Minimum 60% in previous class",
+    ],
+  },
+  {
+    name: "HDFC EWS Higher Secondary Scholarship",
+    provider: "HDFC Bank Parivartan",
+    description:
+      "Private scholarship for EWS students pursuing Class 11 and 12 education.",
+    amount: 25000,
+    deadline: "2026-08-20",
+    type: "private",
+    category: "ews",
+    education_level: "12th",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://www.hdfcbank.com",
+    is_featured: false,
+    documents_required: [
+      "Class 10 marksheet",
+      "Income certificate",
+      "School enrollment proof",
+      "Bank account details",
+    ],
+    eligibility_criteria: [
+      "Studying in Class 11 or 12",
+      "EWS category applicant",
+      "Good academic performance",
+    ],
+  },
+  {
+    name: "University of Hyderabad EWS Postgraduate Grant",
+    provider: "University of Hyderabad",
+    description:
+      "University-funded grant for EWS postgraduate students enrolled in full-time master's programmes.",
+    amount: 90000,
+    deadline: "2026-10-05",
+    type: "university",
+    category: "ews",
+    education_level: "postgraduate",
+    stream: null,
+    state: "Telangana",
+    country: "India",
+    official_url: "https://uohyd.ac.in",
+    is_featured: false,
+    documents_required: [
+      "PG admission letter",
+      "Income certificate",
+      "UG marksheets",
+      "Fee receipt",
+    ],
+    eligibility_criteria: [
+      "Enrolled in University of Hyderabad PG programme",
+      "EWS certificate or income proof",
+      "Meets university academic standards",
+    ],
+  },
+  {
+    name: "Erasmus Inclusion Scholarship for EWS Students",
+    provider: "Erasmus+ Partner Universities",
+    description:
+      "International scholarship for EWS Indian students pursuing eligible postgraduate mobility programmes in Europe.",
+    amount: 1200000,
+    deadline: "2026-11-20",
+    type: "international",
+    category: "ews",
+    education_level: "postgraduate",
+    stream: null,
+    state: null,
+    country: "European Union",
+    official_url: "https://erasmus-plus.ec.europa.eu",
+    is_featured: true,
+    documents_required: [
+      "Bachelor's degree certificate",
+      "Income certificate",
+      "Statement of purpose",
+      "English proficiency proof",
+      "Recommendation letters",
+    ],
+    eligibility_criteria: [
+      "Indian applicant from EWS background",
+      "Eligible for Erasmus partner programme",
+      "Admitted or applying to postgraduate track",
+    ],
+  },
+  {
+    name: "IISc EWS Doctoral Research Fellowship",
+    provider: "Indian Institute of Science Bengaluru",
+    description:
+      "University doctoral fellowship for EWS candidates admitted to full-time PhD programmes at IISc.",
+    amount: 420000,
+    deadline: "2026-12-01",
+    type: "university",
+    category: "ews",
+    education_level: "phd",
+    stream: "Science",
+    state: "Karnataka",
+    country: "India",
+    official_url: "https://www.iisc.ac.in",
+    is_featured: true,
+    documents_required: [
+      "PhD admission offer",
+      "Master's degree transcripts",
+      "Income/EWS certificate",
+      "Research proposal",
+      "Identity proof",
+    ],
+    eligibility_criteria: [
+      "Admitted to a PhD programme at IISc",
+      "EWS category with valid certificate",
+      "Meets institute research admission criteria",
+    ],
+  },
+  {
+    name: "OBC Pre-Matric Excellence Scholarship (Class 10)",
+    provider: "Ministry of Social Justice & Empowerment",
+    description:
+      "Government scholarship for OBC students in Class 10 from low-income households.",
+    amount: 20000,
+    deadline: "2026-09-25",
+    type: "government",
+    category: "obc",
+    education_level: "10th",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://scholarships.gov.in",
+    is_featured: false,
+    documents_required: [
+      "Class 9 marksheet",
+      "OBC certificate",
+      "Income certificate",
+      "School bonafide certificate",
+    ],
+    eligibility_criteria: [
+      "Studying in Class 10",
+      "Valid OBC certificate",
+      "Family income within scheme limit",
+    ],
+  },
+  {
+    name: "Aditya Birla OBC Higher Secondary Scholarship",
+    provider: "Aditya Birla Capital Foundation",
+    description:
+      "Private scholarship support for OBC students pursuing Class 11 and 12 studies.",
+    amount: 28000,
+    deadline: "2026-08-28",
+    type: "private",
+    category: "obc",
+    education_level: "12th",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://www.adityabirlacapital.com",
+    is_featured: false,
+    documents_required: [
+      "Class 10 marksheet",
+      "OBC certificate",
+      "Income proof",
+      "School enrollment letter",
+    ],
+    eligibility_criteria: [
+      "Studying in Class 11 or 12",
+      "OBC category student",
+      "Demonstrated academic merit",
+    ],
+  },
+  {
+    name: "JNU OBC Merit Scholarship",
+    provider: "Jawaharlal Nehru University",
+    description:
+      "University scholarship for OBC undergraduate students with strong academic performance.",
+    amount: 85000,
+    deadline: "2026-10-10",
+    type: "university",
+    category: "obc",
+    education_level: "undergraduate",
+    stream: null,
+    state: "Delhi",
+    country: "India",
+    official_url: "https://www.jnu.ac.in",
+    is_featured: true,
+    documents_required: [
+      "University admission proof",
+      "OBC certificate",
+      "Previous semester marksheet",
+      "Income certificate",
+    ],
+    eligibility_criteria: [
+      "Enrolled in JNU UG programme",
+      "Valid OBC certificate",
+      "Meets university merit criteria",
+    ],
+  },
+  {
+    name: "ASEAN-India OBC Postgraduate Mobility Scholarship",
+    provider: "ASEAN-India Academic Partnership",
+    description:
+      "International scholarship for OBC students pursuing eligible postgraduate programmes abroad.",
+    amount: 1350000,
+    deadline: "2026-11-05",
+    type: "international",
+    category: "obc",
+    education_level: "postgraduate",
+    stream: null,
+    state: null,
+    country: "Singapore",
+    official_url: "https://www.studyinindia.gov.in",
+    is_featured: false,
+    documents_required: [
+      "Bachelor's degree transcript",
+      "OBC certificate",
+      "Statement of purpose",
+      "Language proficiency proof",
+    ],
+    eligibility_criteria: [
+      "Indian OBC applicant",
+      "Admission to eligible postgraduate programme",
+      "Strong academic record",
+    ],
+  },
+  {
+    name: "IIT Madras OBC Doctoral Fellowship",
+    provider: "Indian Institute of Technology Madras",
+    description:
+      "University-supported fellowship for OBC scholars enrolled in full-time PhD programmes.",
+    amount: 450000,
+    deadline: "2026-12-10",
+    type: "university",
+    category: "obc",
+    education_level: "phd",
+    stream: "Engineering",
+    state: "Tamil Nadu",
+    country: "India",
+    official_url: "https://www.iitm.ac.in",
+    is_featured: true,
+    documents_required: [
+      "PhD admission letter",
+      "Master's degree documents",
+      "OBC certificate",
+      "Research proposal",
+    ],
+    eligibility_criteria: [
+      "Admitted to IIT Madras PhD programme",
+      "Valid OBC certificate",
+      "Satisfies departmental research requirements",
+    ],
+  },
+  {
+    name: "Infosys Foundation Private Scholarship (Class 10)",
+    provider: "Infosys Foundation",
+    description:
+      "Private scholarship support for meritorious Class 10 students from low-income families.",
+    amount: 22000,
+    deadline: "2026-09-12",
+    type: "private",
+    category: "general",
+    education_level: "10th",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://www.infosys.com/infosys-foundation",
+    is_featured: false,
+    documents_required: [
+      "Class 9 marksheet",
+      "School bonafide certificate",
+      "Income certificate",
+      "Identity proof",
+    ],
+    eligibility_criteria: [
+      "Studying in Class 10",
+      "Minimum 65% in previous class",
+      "Family income within scheme criteria",
+    ],
+  },
+  {
+    name: "L&T Build India Private Undergraduate Scholarship",
+    provider: "Larsen & Toubro CSR",
+    description:
+      "Private scholarship for undergraduate students pursuing engineering and allied disciplines.",
+    amount: 95000,
+    deadline: "2026-10-20",
+    type: "private",
+    category: "general",
+    education_level: "undergraduate",
+    stream: "Engineering",
+    state: null,
+    country: "India",
+    official_url: "https://www.larsentoubro.com",
+    is_featured: true,
+    documents_required: [
+      "College admission proof",
+      "Class XII marksheet",
+      "Income certificate",
+      "Bank account details",
+    ],
+    eligibility_criteria: [
+      "Enrolled in undergraduate programme",
+      "Strong academic record",
+      "Meets sponsor income criteria",
+    ],
+  },
+  {
+    name: "Mahindra Rise Private Postgraduate Scholarship",
+    provider: "Mahindra Group CSR",
+    description:
+      "Private scholarship for postgraduate students pursuing master's programmes in India.",
+    amount: 130000,
+    deadline: "2026-11-01",
+    type: "private",
+    category: "general",
+    education_level: "postgraduate",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://www.mahindra.com",
+    is_featured: false,
+    documents_required: [
+      "Bachelor's degree transcript",
+      "PG admission letter",
+      "Statement of purpose",
+      "Income proof",
+    ],
+    eligibility_criteria: [
+      "Admitted to a postgraduate programme",
+      "Academic merit in undergraduate degree",
+      "Demonstrated financial need",
+    ],
+  },
+  {
+    name: "Bharti Foundation Private Scholarship for SC Students",
+    provider: "Bharti Foundation",
+    description:
+      "Private scholarship support for Scheduled Caste students pursuing higher education.",
+    amount: 80000,
+    deadline: "2026-10-08",
+    type: "private",
+    category: "sc",
+    education_level: "undergraduate",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://www.bhartifoundation.org",
+    is_featured: false,
+    documents_required: [
+      "SC certificate",
+      "Admission proof",
+      "Previous marksheet",
+      "Income certificate",
+    ],
+    eligibility_criteria: [
+      "Valid SC category certificate",
+      "Enrolled in recognized undergraduate programme",
+      "Meets scholarship merit and need criteria",
+    ],
+  },
+  {
+    name: "Azim Premji Private Scholarship for ST Students",
+    provider: "Azim Premji Foundation",
+    description:
+      "Private financial aid for Scheduled Tribe students in undergraduate and diploma programmes.",
+    amount: 85000,
+    deadline: "2026-10-18",
+    type: "private",
+    category: "st",
+    education_level: "undergraduate",
+    stream: null,
+    state: null,
+    country: "India",
+    official_url: "https://azimpremjifoundation.org",
+    is_featured: false,
+    documents_required: [
+      "ST certificate",
+      "College admission letter",
+      "Income proof",
+      "Identity document",
+    ],
+    eligibility_criteria: [
+      "Valid ST category certificate",
+      "Admitted to recognized institution",
+      "Demonstrated financial need",
+    ],
+  },
+  {
+    name: "Chevening Inclusion Scholarship for SC Students",
+    provider: "UK Foreign, Commonwealth & Development Office",
+    description:
+      "International postgraduate scholarship support for Indian SC category students pursuing master's study in the UK.",
+    amount: 1800000,
+    deadline: "2026-11-25",
+    type: "international",
+    category: "sc",
+    education_level: "postgraduate",
+    stream: null,
+    state: null,
+    country: "United Kingdom",
+    official_url: "https://www.chevening.org",
+    is_featured: true,
+    documents_required: [
+      "Bachelor's degree transcript",
+      "SC certificate",
+      "Statement of purpose",
+      "English proficiency proof",
+      "Recommendation letters",
+    ],
+    eligibility_criteria: [
+      "Indian applicant with valid SC certificate",
+      "Admitted or applying to eligible UK master's programme",
+      "Strong academic and leadership profile",
+    ],
+  },
+  {
+    name: "DAAD Opportunity Scholarship for ST Students",
+    provider: "German Academic Exchange Service (DAAD)",
+    description:
+      "International scholarship for Indian ST students applying to selected postgraduate programmes in Germany.",
+    amount: 1600000,
+    deadline: "2026-12-05",
+    type: "international",
+    category: "st",
+    education_level: "postgraduate",
+    stream: null,
+    state: null,
+    country: "Germany",
+    official_url: "https://www.daad.de",
+    is_featured: false,
+    documents_required: [
+      "Bachelor's degree certificate",
+      "ST certificate",
+      "CV and motivation letter",
+      "Language proficiency proof",
+    ],
+    eligibility_criteria: [
+      "Indian student with valid ST certificate",
+      "Admission to eligible postgraduate programme",
+      "Meets DAAD academic criteria",
+    ],
+  },
+  {
+    name: "Banaras Hindu University SC School Support Scholarship",
+    provider: "Banaras Hindu University",
+    description:
+      "University scholarship for SC students in Class 10 under affiliated school support programmes.",
+    amount: 22000,
+    deadline: "2026-09-05",
+    type: "university",
+    category: "sc",
+    education_level: "10th",
+    stream: null,
+    state: "Uttar Pradesh",
+    country: "India",
+    official_url: "https://www.bhu.ac.in",
+    is_featured: false,
+    documents_required: ["SC certificate", "Class 9 marksheet", "Income certificate", "School bonafide certificate"],
+    eligibility_criteria: ["SC category student", "Studying in Class 10", "Meets university support scheme criteria"],
+  },
+  {
+    name: "University of Madras ST School Merit Grant",
+    provider: "University of Madras",
+    description:
+      "University-funded merit grant for ST students in Class 10 through outreach programmes.",
+    amount: 22000,
+    deadline: "2026-09-07",
+    type: "university",
+    category: "st",
+    education_level: "10th",
+    stream: null,
+    state: "Tamil Nadu",
+    country: "India",
+    official_url: "https://www.unom.ac.in",
+    is_featured: false,
+    documents_required: ["ST certificate", "Class 9 marksheet", "Income proof", "Bonafide certificate"],
+    eligibility_criteria: ["ST category student", "Studying in Class 10", "Academic merit in previous class"],
+  },
+  {
+    name: "Panjab University SC Higher Secondary Scholarship",
+    provider: "Panjab University",
+    description:
+      "Scholarship for SC students pursuing Class 11/12 in partner institutions supported by university funds.",
+    amount: 30000,
+    deadline: "2026-09-18",
+    type: "university",
+    category: "sc",
+    education_level: "12th",
+    stream: null,
+    state: "Punjab",
+    country: "India",
+    official_url: "https://puchd.ac.in",
+    is_featured: false,
+    documents_required: ["SC certificate", "Class 10 marksheet", "Enrollment proof", "Income certificate"],
+    eligibility_criteria: ["SC category", "Studying in Class 11 or 12", "Meets need-based criteria"],
+  },
+  {
+    name: "Calcutta University ST Higher Secondary Scholarship",
+    provider: "University of Calcutta",
+    description:
+      "University aid for ST students at higher secondary level through institutional support channels.",
+    amount: 30000,
+    deadline: "2026-09-20",
+    type: "university",
+    category: "st",
+    education_level: "12th",
+    stream: null,
+    state: "West Bengal",
+    country: "India",
+    official_url: "https://www.caluniv.ac.in",
+    is_featured: false,
+    documents_required: ["ST certificate", "Class 10 marksheet", "School letter", "Income proof"],
+    eligibility_criteria: ["ST category", "Class 11/12 student", "Satisfactory academic performance"],
+  },
+  {
+    name: "Osmania University SC Undergraduate Merit Scholarship",
+    provider: "Osmania University",
+    description:
+      "University scholarship for SC undergraduate students with strong academic performance.",
+    amount: 90000,
+    deadline: "2026-10-02",
+    type: "university",
+    category: "sc",
+    education_level: "undergraduate",
+    stream: null,
+    state: "Telangana",
+    country: "India",
+    official_url: "https://www.osmania.ac.in",
+    is_featured: true,
+    documents_required: ["SC certificate", "Admission proof", "Previous marksheet", "Income certificate"],
+    eligibility_criteria: ["SC category student", "Enrolled in UG programme", "Maintains minimum academic score"],
+  },
+  {
+    name: "Savitribai Phule Pune University ST Undergraduate Grant",
+    provider: "Savitribai Phule Pune University",
+    description:
+      "Need-cum-merit university grant for ST students in undergraduate degree programmes.",
+    amount: 90000,
+    deadline: "2026-10-04",
+    type: "university",
+    category: "st",
+    education_level: "undergraduate",
+    stream: null,
+    state: "Maharashtra",
+    country: "India",
+    official_url: "http://www.unipune.ac.in",
+    is_featured: true,
+    documents_required: ["ST certificate", "UG admission letter", "Income proof", "Bank details"],
+    eligibility_criteria: ["ST category student", "Pursuing undergraduate course", "Meets university norms"],
+  },
+  {
+    name: "University of Kerala SC Postgraduate Fellowship",
+    provider: "University of Kerala",
+    description:
+      "Postgraduate fellowship for SC students enrolled in master's programmes.",
+    amount: 120000,
+    deadline: "2026-10-22",
+    type: "university",
+    category: "sc",
+    education_level: "postgraduate",
+    stream: null,
+    state: "Kerala",
+    country: "India",
+    official_url: "https://www.keralauniversity.ac.in",
+    is_featured: false,
+    documents_required: ["SC certificate", "PG admission proof", "UG transcript", "Income certificate"],
+    eligibility_criteria: ["SC category", "Enrolled in postgraduate programme", "Academic merit and need basis"],
+  },
+  {
+    name: "Anna University ST Postgraduate Fellowship",
+    provider: "Anna University",
+    description:
+      "University postgraduate fellowship for ST students in engineering and allied disciplines.",
+    amount: 120000,
+    deadline: "2026-10-25",
+    type: "university",
+    category: "st",
+    education_level: "postgraduate",
+    stream: "Engineering",
+    state: "Tamil Nadu",
+    country: "India",
+    official_url: "https://www.annauniv.edu",
+    is_featured: false,
+    documents_required: ["ST certificate", "PG admission letter", "UG marksheets", "Income proof"],
+    eligibility_criteria: ["ST category", "Admitted in PG programme", "Meets departmental eligibility"],
+  },
+  {
+    name: "Jawaharlal Nehru University SC Doctoral Fellowship",
+    provider: "Jawaharlal Nehru University",
+    description:
+      "University fellowship for SC PhD scholars pursuing full-time research.",
+    amount: 420000,
+    deadline: "2026-12-12",
+    type: "university",
+    category: "sc",
+    education_level: "phd",
+    stream: null,
+    state: "Delhi",
+    country: "India",
+    official_url: "https://www.jnu.ac.in",
+    is_featured: true,
+    documents_required: ["SC certificate", "PhD admission letter", "Research proposal", "Master's transcripts"],
+    eligibility_criteria: ["SC category scholar", "Enrolled in PhD", "Approved research proposal"],
+  },
+  {
+    name: "University of Mysore ST Doctoral Fellowship",
+    provider: "University of Mysore",
+    description:
+      "Doctoral fellowship for ST researchers enrolled in full-time PhD programmes.",
+    amount: 420000,
+    deadline: "2026-12-15",
+    type: "university",
+    category: "st",
+    education_level: "phd",
+    stream: null,
+    state: "Karnataka",
+    country: "India",
+    official_url: "https://uni-mysore.ac.in",
+    is_featured: true,
+    documents_required: ["ST certificate", "PhD registration proof", "Research synopsis", "Master's degree documents"],
+    eligibility_criteria: ["ST category scholar", "Registered PhD candidate", "Fulfills university fellowship criteria"],
+  },
 ];
+
+const CATEGORIES = ["general", "obc", "sc", "st", "ews"] as const;
+const TYPES = ["government", "private", "international", "university"] as const;
+const EDUCATION_LEVELS = ["10th", "12th", "undergraduate", "postgraduate", "phd"] as const;
+
+const LEVEL_LABELS: Record<(typeof EDUCATION_LEVELS)[number], string> = {
+  "10th": "10th",
+  "12th": "12th",
+  undergraduate: "Undergraduate",
+  postgraduate: "Postgraduate",
+  phd: "PhD",
+};
+
+const LEVEL_AMOUNTS: Record<(typeof EDUCATION_LEVELS)[number], number> = {
+  "10th": 20000,
+  "12th": 30000,
+  undergraduate: 100000,
+  postgraduate: 140000,
+  phd: 420000,
+};
+
+function titleCase(value: string): string {
+  return value
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function buildCoverageScholarships(existing: typeof SCHOLARSHIPS) {
+  const seen = new Set(
+    existing.map((s) => `${s.category}|${s.type}|${s.education_level}`)
+  );
+
+  const generated: typeof SCHOLARSHIPS = [];
+
+  for (const category of CATEGORIES) {
+    for (const type of TYPES) {
+      for (const level of EDUCATION_LEVELS) {
+        const key = `${category}|${type}|${level}`;
+        if (seen.has(key)) continue;
+
+        const categoryLabel = category.toUpperCase();
+        const typeLabel = titleCase(type);
+        const levelLabel = LEVEL_LABELS[level];
+
+        generated.push({
+          name: `${typeLabel} ${categoryLabel} ${levelLabel} Scholarship`,
+          provider: `${typeLabel} Scholarship Board`,
+          description: `Scholarship support for ${categoryLabel} students at ${levelLabel} level under ${typeLabel.toLowerCase()} category.`,
+          amount: LEVEL_AMOUNTS[level],
+          deadline: "2026-12-31",
+          type,
+          category,
+          education_level: level,
+          stream: null,
+          state: null,
+          country: type === "international" ? "Global" : "India",
+          official_url: "https://scholarships.gov.in",
+          is_featured: false,
+          documents_required: [
+            `${categoryLabel} category certificate`,
+            "Latest marksheet",
+            "Income certificate",
+            "Identity proof",
+          ],
+          eligibility_criteria: [
+            `${categoryLabel} category applicant`,
+            `Studying at ${levelLabel} level`,
+            `Eligible under ${typeLabel.toLowerCase()} scholarship criteria`,
+          ],
+        });
+      }
+    }
+  }
+
+  return generated;
+}
+
+const COVERAGE_SCHOLARSHIPS = buildCoverageScholarships(SCHOLARSHIPS);
+const ALL_SCHOLARSHIPS = [...SCHOLARSHIPS, ...COVERAGE_SCHOLARSHIPS];
 
 async function seed() {
   console.log("🌱 Seeding scholarships...");
@@ -425,7 +1201,7 @@ async function seed() {
   // Reset sequence
   await pool.query("ALTER SEQUENCE scholarships_id_seq RESTART WITH 1");
 
-  for (const s of SCHOLARSHIPS) {
+  for (const s of ALL_SCHOLARSHIPS) {
     await pool.query(
       `INSERT INTO scholarships
         (name, provider, description, amount, deadline, type, category,
@@ -452,11 +1228,9 @@ async function seed() {
     );
   }
 
-  console.log(`✅ Seeded ${SCHOLARSHIPS.length} scholarships`);
+  console.log(`✅ Seeded ${ALL_SCHOLARSHIPS.length} scholarships`);
 
-  // ── Seed admin user ────────────────────────────────────────
-  await pool.query("DELETE FROM users");
-  await pool.query("ALTER SEQUENCE users_id_seq RESTART WITH 1");
+  // ── Ensure default admin/test users exist (do not wipe existing users) ──
 
   const adminHash = await bcrypt.hash("admin123", 12);
   await pool.query(

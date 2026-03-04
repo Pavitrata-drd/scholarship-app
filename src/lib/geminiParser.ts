@@ -78,7 +78,7 @@ export async function parseScholarshipsWithAI(
         .replace(/\s*```$/i, "")
         .trim();
 
-    let parsed: any[];
+    let parsed: unknown;
     try {
         parsed = JSON.parse(jsonStr);
     } catch {
@@ -89,7 +89,7 @@ export async function parseScholarshipsWithAI(
         throw new Error("AI returned unexpected format. Expected an array of scholarships.");
     }
 
-    return parsed.map(validateAndNormalize);
+    return parsed.map((item) => validateAndNormalize(item as Record<string, unknown>));
 }
 
 // ── CSV parser (non-AI fallback) ───────────────────────────────
@@ -150,15 +150,26 @@ function parseCSVLine(line: string): string[] {
 
 // ── Validation ─────────────────────────────────────────────────
 
-const VALID_TYPES = ["government", "private", "international", "university"];
-const VALID_LEVELS = ["10th", "12th", "undergraduate", "postgraduate", "phd"];
-const VALID_CATEGORIES = ["general", "obc", "sc", "st", "ews"];
+const VALID_TYPES = ["government", "private", "international", "university"] as const;
+const VALID_LEVELS = ["10th", "12th", "undergraduate", "postgraduate", "phd"] as const;
+const VALID_CATEGORIES = ["general", "obc", "sc", "st", "ews"] as const;
 
-function validateAndNormalize(raw: any): ParsedScholarship {
+function asString(value: unknown): string {
+    if (typeof value === "string") return value;
+    if (value === null || value === undefined) return "";
+    return String(value);
+}
+
+function asNullableString(value: unknown): string | null {
+    const str = asString(value).trim();
+    return str.length > 0 ? str : null;
+}
+
+function validateAndNormalize(raw: Record<string, unknown>): ParsedScholarship {
     const errors: string[] = [];
 
-    const name = String(raw.name || "").trim();
-    const provider = String(raw.provider || "").trim();
+    const name = asString(raw.name).trim();
+    const provider = asString(raw.provider).trim();
     const amount = Number(raw.amount) || 0;
     const deadline = normalizeDate(raw.deadline);
 
@@ -166,34 +177,42 @@ function validateAndNormalize(raw: any): ParsedScholarship {
     if (!provider) errors.push("Missing provider");
     if (!deadline) errors.push("Invalid deadline");
 
-    let type = String(raw.type || "government").toLowerCase();
-    if (!VALID_TYPES.includes(type)) type = "government";
+    const rawType = asString(raw.type || "government").toLowerCase();
+    const type: ParsedScholarship["type"] = (VALID_TYPES as readonly string[]).includes(rawType)
+        ? (rawType as ParsedScholarship["type"])
+        : "government";
 
-    let education_level = raw.education_level ? String(raw.education_level).toLowerCase() : null;
-    if (education_level && !VALID_LEVELS.includes(education_level)) education_level = null;
+    const rawLevel = raw.education_level ? asString(raw.education_level).toLowerCase() : "";
+    const education_level: ParsedScholarship["education_level"] =
+        rawLevel && (VALID_LEVELS as readonly string[]).includes(rawLevel)
+            ? (rawLevel as ParsedScholarship["education_level"])
+            : null;
 
-    let category = raw.category ? String(raw.category).toLowerCase() : null;
-    if (category && !VALID_CATEGORIES.includes(category)) category = null;
+    const rawCategory = raw.category ? asString(raw.category).toLowerCase() : "";
+    const category: ParsedScholarship["category"] =
+        rawCategory && (VALID_CATEGORIES as readonly string[]).includes(rawCategory)
+            ? (rawCategory as ParsedScholarship["category"])
+            : null;
 
     return {
         name,
         provider,
-        description: String(raw.description || "").trim(),
+        description: asString(raw.description).trim(),
         amount,
         deadline: deadline || "2025-12-31",
-        type: type as ParsedScholarship["type"],
-        education_level: education_level as ParsedScholarship["education_level"],
-        category: category as ParsedScholarship["category"],
-        stream: raw.stream ? String(raw.stream).trim() : null,
-        state: raw.state ? String(raw.state).trim() : null,
-        official_url: raw.official_url ? String(raw.official_url).trim() : null,
+        type,
+        education_level,
+        category,
+        stream: asNullableString(raw.stream),
+        state: asNullableString(raw.state),
+        official_url: asNullableString(raw.official_url),
         _valid: errors.length === 0,
         _selected: true,
         _error: errors.length > 0 ? errors.join(", ") : undefined,
     };
 }
 
-function normalizeDate(input: any): string | null {
+function normalizeDate(input: unknown): string | null {
     if (!input) return null;
     const str = String(input).trim();
 
@@ -207,7 +226,7 @@ function normalizeDate(input: any): string | null {
     }
 
     // DD/MM/YYYY or DD-MM-YYYY
-    const match = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    const match = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
     if (match) {
         const [, day, month, year] = match;
         return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;

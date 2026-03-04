@@ -1,0 +1,205 @@
+import { useState, useCallback, type ReactNode } from "react";
+import { I18nContext } from "./i18nContext";
+
+// ── Translation dictionaries ───────────────────────────────────
+
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    "nav.scholarships": "Scholarships",
+    "nav.dashboard": "Dashboard",
+    "nav.admin": "Admin",
+    "nav.profile": "Profile",
+    "nav.login": "Login",
+    "nav.logout": "Logout",
+    "hero.tagline": "India's #1 Scholarship Platform",
+    "hero.title": "Find & Apply to Scholarships That Match Your Profile",
+    "hero.subtitle": "Discover thousands of scholarships from government, private, and international organizations. Get matched instantly based on your profile.",
+    "hero.search": "Search scholarships by name or keyword...",
+    "dashboard.title": "Dashboard",
+    "dashboard.subtitle": "Your scholarship overview",
+    "dashboard.overview": "Overview",
+    "dashboard.saved": "Saved",
+    "dashboard.applications": "Applications",
+    "dashboard.documents": "Documents",
+    "dashboard.notifications": "Notifications",
+    "dashboard.recommendations": "Recommended for You",
+    "saved.empty": "No saved scholarships yet. Browse and bookmark scholarships you're interested in!",
+    "apps.empty": "No applications yet. Start tracking your scholarship applications!",
+    "apps.interested": "Interested",
+    "apps.applied": "Applied",
+    "apps.under_review": "Under Review",
+    "apps.accepted": "Accepted",
+    "apps.rejected": "Rejected",
+    "docs.title": "Document Vault",
+    "docs.subtitle": "Upload and manage your documents for scholarship applications",
+    "docs.upload": "Upload Document",
+    "docs.empty": "No documents uploaded yet",
+    "profile.title": "Profile & Preferences",
+    "profile.subtitle": "Your profile helps us recommend the best scholarships for you",
+    "profile.save": "Save Profile",
+    "detail.apply": "Apply Now",
+    "detail.save": "Save Scholarship",
+    "detail.unsave": "Unsave",
+    "detail.share": "Share",
+    "detail.export": "Export PDF",
+    "detail.eligibility": "Eligibility Criteria",
+    "detail.documents": "Required Documents",
+    "detail.similar": "Similar Scholarships",
+    "common.loading": "Loading...",
+    "common.error": "An error occurred",
+    "common.amount": "Amount",
+    "common.deadline": "Deadline",
+    "common.provider": "Provider",
+    "common.type": "Type",
+    "common.category": "Category",
+    "common.education": "Education Level",
+    "total_scholarships": "Total Scholarships",
+    "active": "Active",
+    "providers": "Providers",
+    "total_funding": "Total Funding",
+    "featured.title": "Featured Scholarships",
+    "featured.subtitle": "Handpicked opportunities you don't want to miss",
+    "how.title": "How It Works",
+    "how.subtitle": "Three simple steps to your next scholarship",
+    "how.step1.title": "Create Your Profile",
+    "how.step1.desc": "Sign up and fill in your academic details, category, and preferences.",
+    "how.step2.title": "Get Matched",
+    "how.step2.desc": "Our smart engine matches you with scholarships you're eligible for.",
+    "how.step3.title": "Apply & Track",
+    "how.step3.desc": "Apply in one click, upload documents, and track your application status.",
+  },
+  hi: {
+    "nav.scholarships": "छात्रवृत्तियाँ",
+    "nav.dashboard": "डैशबोर्ड",
+    "nav.admin": "एडमिन",
+    "nav.profile": "प्रोफ़ाइल",
+    "nav.login": "लॉगिन",
+    "nav.logout": "लॉगआउट",
+    "hero.tagline": "भारत का #1 छात्रवृत्ति प्लेटफ़ॉर्म",
+    "hero.title": "अपनी प्रोफ़ाइल से मेल खाने वाली छात्रवृत्तियाँ खोजें और आवेदन करें",
+    "hero.subtitle": "सरकारी, निजी और अंतर्राष्ट्रीय संगठनों से हज़ारों छात्रवृत्तियाँ खोजें। अपनी प्रोफ़ाइल के आधार पर तुरंत मैच करें।",
+    "hero.search": "नाम या कीवर्ड से छात्रवृत्ति खोजें...",
+    "dashboard.title": "डैशबोर्ड",
+    "dashboard.subtitle": "आपकी छात्रवृत्ति का अवलोकन",
+    "dashboard.overview": "अवलोकन",
+    "dashboard.saved": "सहेजी गई",
+    "dashboard.applications": "आवेदन",
+    "dashboard.documents": "दस्तावेज़",
+    "dashboard.notifications": "सूचनाएँ",
+    "dashboard.recommendations": "आपके लिए अनुशंसित",
+    "saved.empty": "अभी तक कोई छात्रवृत्ति सहेजी नहीं गई है। ब्राउज़ करें और बुकमार्क करें!",
+    "apps.empty": "अभी तक कोई आवेदन नहीं। अपने आवेदनों को ट्रैक करना शुरू करें!",
+    "apps.interested": "रुचि है",
+    "apps.applied": "आवेदन किया",
+    "apps.under_review": "समीक्षाधीन",
+    "apps.accepted": "स्वीकृत",
+    "apps.rejected": "अस्वीकृत",
+    "docs.title": "दस्तावेज़ वॉल्ट",
+    "docs.subtitle": "छात्रवृत्ति आवेदनों के लिए अपने दस्तावेज़ अपलोड और प्रबंधित करें",
+    "docs.upload": "दस्तावेज़ अपलोड करें",
+    "docs.empty": "अभी तक कोई दस्तावेज़ अपलोड नहीं किया गया",
+    "profile.title": "प्रोफ़ाइल और प्राथमिकताएँ",
+    "profile.subtitle": "आपकी प्रोफ़ाइल हमें आपके लिए सर्वोत्तम छात्रवृत्तियाँ सुझाने में मदद करती है",
+    "profile.save": "प्रोफ़ाइल सहेजें",
+    "detail.apply": "अभी आवेदन करें",
+    "detail.save": "छात्रवृत्ति सहेजें",
+    "detail.unsave": "हटाएं",
+    "detail.share": "शेयर करें",
+    "detail.export": "PDF डाउनलोड",
+    "detail.eligibility": "पात्रता मानदंड",
+    "detail.documents": "आवश्यक दस्तावेज़",
+    "detail.similar": "समान छात्रवृत्तियाँ",
+    "common.loading": "लोड हो रहा है...",
+    "common.error": "एक त्रुटि हुई",
+    "common.amount": "राशि",
+    "common.deadline": "अंतिम तिथि",
+    "common.provider": "प्रदाता",
+    "common.type": "प्रकार",
+    "common.category": "श्रेणी",
+    "common.education": "शिक्षा स्तर",
+    "total_scholarships": "कुल छात्रवृत्तियाँ",
+    "active": "सक्रिय",
+    "providers": "प्रदाता",
+    "total_funding": "कुल फंडिंग",
+    "featured.title": "विशेष छात्रवृत्तियाँ",
+    "featured.subtitle": "चुनिंदा अवसर जो आप मिस नहीं करना चाहेंगे",
+    "how.title": "यह कैसे काम करता है",
+    "how.subtitle": "अगली छात्रवृत्ति के लिए तीन आसान कदम",
+    "how.step1.title": "प्रोफ़ाइल बनाएँ",
+    "how.step1.desc": "साइन अप करें और अपनी शैक्षणिक जानकारी, श्रेणी और प्राथमिकताएँ भरें।",
+    "how.step2.title": "मैच पाएँ",
+    "how.step2.desc": "हमारा स्मार्ट इंजन आपको उन छात्रवृत्तियों से मिलाता है जिनके लिए आप पात्र हैं।",
+    "how.step3.title": "आवेदन करें और ट्रैक करें",
+    "how.step3.desc": "एक क्लिक में आवेदन करें, दस्तावेज़ अपलोड करें, और अपने आवेदन की स्थिति ट्रैक करें।",
+  },
+  ta: {
+    "nav.scholarships": "உதவித்தொகைகள்",
+    "nav.dashboard": "டாஷ்போர்டு",
+    "nav.admin": "நிர்வாகம்",
+    "nav.profile": "சுயவிவரம்",
+    "nav.login": "உள்நுழை",
+    "nav.logout": "வெளியேறு",
+    "hero.tagline": "இந்தியாவின் #1 உதவித்தொகை தளம்",
+    "hero.title": "உங்கள் சுயவிவரத்திற்கு பொருந்தும் உதவித்தொகைகளை கண்டுபிடித்து விண்ணப்பிக்கவும்",
+    "hero.subtitle": "அரசு, தனியார் மற்றும் சர்வதேச அமைப்புகளிலிருந்து ஆயிரக்கணக்கான உதவித்தொகைகளை கண்டறியுங்கள்.",
+    "hero.search": "பெயர் அல்லது முக்கியச் சொல்லால் உதவித்தொகை தேடுங்கள்...",
+  },
+  ml: {
+    "nav.scholarships": "സ്കോളർഷിപ്പുകൾ",
+    "nav.dashboard": "ഡാഷ്ബോർഡ്",
+    "nav.admin": "അഡ്മിൻ",
+    "nav.profile": "പ്രൊഫൈൽ",
+    "nav.login": "ലോഗിൻ",
+    "nav.logout": "ലോഗ്ഔട്ട്",
+    "hero.tagline": "ഇന്ത്യയുടെ #1 സ്കോളർഷിപ്പ് പ്ലാറ്റ്ഫോം",
+    "hero.title": "നിങ്ങളുടെ പ്രൊഫൈലിനൊത്ത് വരുന്ന സ്കോളർഷിപ്പുകൾ കണ്ടെത്തി അപേക്ഷിക്കുക",
+    "hero.subtitle": "സർക്കാർ, സ്വകാര്യ, അന്താരാഷ്ട്ര സ്ഥാപനങ്ങളിൽ നിന്നുള്ള ആയിരക്കണക്കിന് സ്കോളർഷിപ്പുകൾ കണ്ടെത്തൂ.",
+    "hero.search": "പേര് അല്ലെങ്കിൽ കീവേഡിലൂടെ സ്കോളർഷിപ്പ് തിരയുക...",
+  },
+  mr: {
+    "nav.scholarships": "शिष्यवृत्ती",
+    "nav.dashboard": "डॅशबोर्ड",
+    "nav.admin": "ॲडमिन",
+    "nav.profile": "प्रोफाइल",
+    "nav.login": "लॉगिन",
+    "nav.logout": "लॉगआउट",
+    "hero.tagline": "भारताचे #1 शिष्यवृत्ती प्लॅटफॉर्म",
+    "hero.title": "तुमच्या प्रोफाइलशी जुळणाऱ्या शिष्यवृत्ती शोधा आणि अर्ज करा",
+    "hero.subtitle": "शासकीय, खाजगी आणि आंतरराष्ट्रीय संस्थांकडून हजारो शिष्यवृत्ती शोधा.",
+    "hero.search": "नाव किंवा कीवर्डने शिष्यवृत्ती शोधा...",
+  },
+};
+
+// ── Context ────────────────────────────────────────────────────
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "ta", label: "தமிழ்" },
+  { code: "ml", label: "മലയാളം" },
+  { code: "mr", label: "मराठी" },
+];
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState(() => {
+    return localStorage.getItem("scholarhub_lang") || "en";
+  });
+
+  const setLang = useCallback((newLang: string) => {
+    setLangState(newLang);
+    localStorage.setItem("scholarhub_lang", newLang);
+  }, []);
+
+  const t = useCallback(
+    (key: string) => {
+      return translations[lang]?.[key] || translations["en"]?.[key] || key;
+    },
+    [lang]
+  );
+
+  return (
+    <I18nContext.Provider value={{ lang, setLang, t, languages: LANGUAGES }}>
+      {children}
+    </I18nContext.Provider>
+  );
+}

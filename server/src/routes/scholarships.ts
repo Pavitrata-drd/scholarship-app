@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { ZodError } from "zod";
 import pool from "../db/pool.js";
 import {
   scholarshipCreateSchema,
@@ -8,6 +9,7 @@ import {
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
+type QueryParam = string | number | boolean | null;
 
 // ─── GET /api/scholarships ────────────────────────────────────
 // List with optional filtering, search, sorting and pagination
@@ -16,7 +18,7 @@ router.get("/", async (req: Request, res: Response) => {
     const query = scholarshipQuerySchema.parse(req.query);
 
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: QueryParam[] = [];
     let idx = 1;
 
     if (query.search) {
@@ -88,8 +90,8 @@ router.get("/", async (req: Request, res: Response) => {
         totalPages: Math.ceil(total / query.limit),
       },
     });
-  } catch (err: any) {
-    if (err.name === "ZodError") {
+  } catch (err: unknown) {
+    if (err instanceof ZodError) {
       return res.status(400).json({ error: "Invalid query parameters", details: err.errors });
     }
     console.error("GET /api/scholarships error:", err);
@@ -178,8 +180,8 @@ router.post("/", requireAuth, requireAdmin, async (req: Request, res: Response) 
     );
 
     res.status(201).json({ data: result.rows[0] });
-  } catch (err: any) {
-    if (err.name === "ZodError") {
+  } catch (err: unknown) {
+    if (err instanceof ZodError) {
       return res.status(400).json({ error: "Validation failed", details: err.errors });
     }
     console.error("POST /api/scholarships error:", err);
@@ -195,7 +197,7 @@ router.put("/:id", requireAuth, requireAdmin, async (req: Request, res: Response
 
     // Build dynamic SET clause
     const setClauses: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let idx = 1;
 
     for (const [key, value] of Object.entries(body)) {
@@ -221,8 +223,8 @@ router.put("/:id", requireAuth, requireAdmin, async (req: Request, res: Response
     }
 
     res.json({ data: result.rows[0] });
-  } catch (err: any) {
-    if (err.name === "ZodError") {
+  } catch (err: unknown) {
+    if (err instanceof ZodError) {
       return res.status(400).json({ error: "Validation failed", details: err.errors });
     }
     console.error("PUT /api/scholarships/:id error:", err);

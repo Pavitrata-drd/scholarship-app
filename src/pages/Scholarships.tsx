@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Search,
@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Loader2,
   Filter,
+  Bookmark,
+  BookmarkCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,8 @@ import {
 import { format } from "date-fns";
 import Navbar from "@/components/landing/Navbar";
 import { useScholarships } from "@/hooks/useScholarships";
+import { saveScholarship, unsaveScholarship, checkSaved } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 import type { Scholarship } from "@/lib/api";
 
 const Scholarships = () => {
@@ -52,65 +56,139 @@ const Scholarships = () => {
     limit: 20,
   });
 
-  const scholarships = data?.data ?? [];
+  const scholarships = useMemo(() => data?.data ?? [], [data]);
   const meta = data?.meta;
+  const scholarshipIdsKey = useMemo(() => scholarships.map((s) => s.id).join(","), [scholarships]);
+
+  // Track saved state per scholarship
+  const [savedSet, setSavedSet] = useState<Set<number>>(new Set());
+  const [savingId, setSavingId] = useState<number | null>(null);
+
+  // Check saved status for visible scholarships
+  useEffect(() => {
+    const checkAll = async () => {
+      const newSet = new Set<number>();
+      await Promise.allSettled(
+        scholarships.map(async (s) => {
+          try {
+            const r = await checkSaved(s.id);
+            if (r.saved) newSet.add(s.id);
+          } catch (error: unknown) {
+            console.error("Failed to check saved status:", error);
+          }
+        })
+      );
+      setSavedSet(newSet);
+    };
+    if (scholarships.length > 0) checkAll();
+  }, [scholarships, scholarshipIdsKey]);
+
+  const toggleSave = async (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSavingId(id);
+    try {
+      if (savedSet.has(id)) {
+        await unsaveScholarship(id);
+        setSavedSet((p) => { const n = new Set(p); n.delete(id); return n; });
+        toast({ title: "Removed from saved" });
+      } else {
+        await saveScholarship(id);
+        setSavedSet((p) => new Set(p).add(id));
+        toast({ title: "Scholarship saved!" });
+      }
+    } catch (error: unknown) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    }
+    setSavingId(null);
+  };
 
   const ScholarshipCard = ({ s }: { s: Scholarship }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <CardTitle className="text-base">{s.name}</CardTitle>
-        <p className="text-xs text-muted-foreground">{s.provider}</p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {s.description}
-        </p>
+    <Link to={`/scholarship/${s.id}`}>
+      <Card className="hover:shadow-md transition-shadow h-full">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-base">{s.name}</CardTitle>
+              <p className="text-xs text-muted-foreground">{s.provider}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 h-8 w-8"
+              onClick={(e) => toggleSave(e, s.id)}
+              disabled={savingId === s.id}
+            >
+              {savedSet.has(s.id) ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {s.description}
+          </p>
 
-        <div className="flex items-center justify-between text-sm">
-          <span className="flex items-center gap-1 font-semibold">
-            <IndianRupee className="h-3.5 w-3.5" />
-            ₹{Number(s.amount).toLocaleString("en-IN")}
-          </span>
-          {s.deadline && (
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" />
-              {format(new Date(s.deadline), "dd MMM yyyy")}
+          <div className="flex items-center justify-between text-sm">
+            <span className="flex items-center gap-1 font-semibold">
+              <IndianRupee className="h-3.5 w-3.5" />
+              ₹{Number(s.amount).toLocaleString("en-IN")}
             </span>
-          )}
-        </div>
+            {s.deadline && (
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
+                {format(new Date(s.deadline), "dd MMM yyyy")}
+              </span>
+            )}
+          </div>
 
-        <div className="flex flex-wrap gap-2">
-          {s.education_level && (
-            <Badge variant="outline">{s.education_level}</Badge>
-          )}
-          {s.category && <Badge variant="outline">{s.category}</Badge>}
-          <Badge variant="secondary">{s.type}</Badge>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex flex-wrap gap-2">
+            {s.education_level && (
+              <Badge variant="outline">{s.education_level}</Badge>
+            )}
+            {s.category && <Badge variant="outline">{s.category}</Badge>}
+            <Badge variant="secondary">{s.type}</Badge>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 
   const ScholarshipRow = ({ s }: { s: Scholarship }) => (
-    <Card>
-      <CardContent className="flex justify-between p-4">
-        <div>
-          <h3 className="font-semibold">{s.name}</h3>
-          <p className="text-xs text-muted-foreground">{s.provider}</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1 font-semibold">
-            <IndianRupee className="h-3.5 w-3.5" />
-            ₹{Number(s.amount).toLocaleString("en-IN")}
-          </span>
-          {s.deadline && (
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" />
-              {format(new Date(s.deadline), "dd MMM")}
+    <Link to={`/scholarship/${s.id}`}>
+      <Card className="hover:shadow-sm transition-shadow">
+        <CardContent className="flex justify-between p-4">
+          <div>
+            <h3 className="font-semibold">{s.name}</h3>
+            <p className="text-xs text-muted-foreground">{s.provider}</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1 font-semibold">
+              <IndianRupee className="h-3.5 w-3.5" />
+              ₹{Number(s.amount).toLocaleString("en-IN")}
             </span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {s.deadline && (
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
+                {format(new Date(s.deadline), "dd MMM")}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => toggleSave(e, s.id)}
+              disabled={savingId === s.id}
+            >
+              {savedSet.has(s.id) ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 
   return (
