@@ -11,6 +11,7 @@ import applicationRoutes from "./routes/applications.js";
 import documentRoutes from "./routes/documents.js";
 import notificationRoutes from "./routes/notifications.js";
 import adminRoutes from "./routes/admin.js";
+import { startDeadlineReminderJob } from "./jobs/deadlineReminders.js";
 
 dotenv.config();
 
@@ -105,6 +106,8 @@ async function start() {
 
   server = app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
+    // Start background jobs
+    startDeadlineReminderJob();
   });
 
   server.on("error", (err: NodeJS.ErrnoException) => {
