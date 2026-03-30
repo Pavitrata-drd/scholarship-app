@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE UNIQUE INDEX IF NOT EXISTS users_full_name_canonical_unique
+  ON users ((regexp_replace(lower(trim(full_name)), '\\s+', ' ', 'g')));
 
 -- Scholarships table
 CREATE TABLE IF NOT EXISTS scholarships (

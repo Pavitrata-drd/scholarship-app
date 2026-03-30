@@ -12,6 +12,9 @@
 import pool from "./pool.js";
 
 const UP = `
+CREATE UNIQUE INDEX IF NOT EXISTS users_full_name_canonical_unique
+  ON users ((regexp_replace(lower(trim(full_name)), '\\s+', ' ', 'g')));
+
 -- ── user_profiles ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS user_profiles (
   id              SERIAL PRIMARY KEY,

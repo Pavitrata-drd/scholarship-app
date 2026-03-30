@@ -2,7 +2,8 @@
  * Frontend API client — talks to our Express backend.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const DEFAULT_API_BASE = `${window.location.protocol}//${window.location.hostname}:5000/api`;
+const API_BASE = import.meta.env.VITE_API_URL || DEFAULT_API_BASE;
 
 // ── Types matching the DB schema ────────────────────────────────
 

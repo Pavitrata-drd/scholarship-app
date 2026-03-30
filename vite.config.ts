@@ -5,7 +5,8 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "localhost",
+    // Bind to all interfaces so the dev server is reachable from mobile devices on LAN.
+    host: true,
     port: 3000,
     hmr: {
       overlay: false,

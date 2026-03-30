@@ -6,6 +6,12 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import pool from "../db/pool.js";
 import { requireAuth } from "../middleware/auth.js";
+import {
+  canonicalizeFullName,
+  isSuspiciousRepeatedName,
+  normalizeEmail,
+  normalizeFullName,
+} from "../utils/nameSecurity.js";
 
 const router = Router();
 
@@ -42,7 +48,11 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 // ── Validation schemas ─────────────────────────────────────────
 
 const registerSchema = z.object({
-  full_name: z.string().min(2, "Name must be at least 2 characters"),
+  full_name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(200, "Name is too long")
+    .transform((v) => normalizeFullName(v)),
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
@@ -67,14 +77,38 @@ function signToken(user: { id: number; email: string; role: string }) {
 router.post("/register", async (req: Request, res: Response) => {
   try {
     const body = registerSchema.parse(req.body);
+    const normalizedEmail = normalizeEmail(body.email);
+    const normalizedFullName = normalizeFullName(body.full_name);
+    const canonicalName = canonicalizeFullName(normalizedFullName);
+
+    if (isSuspiciousRepeatedName(normalizedFullName)) {
+      return res.status(400).json({
+        error: "Please enter a valid full name",
+      });
+    }
 
     // Check if email already exists
     const existing = await pool.query(
       "SELECT id FROM users WHERE email = $1",
-      [body.email.toLowerCase()]
+      [normalizedEmail]
     );
     if (existing.rows.length > 0) {
       return res.status(409).json({ error: "Email already registered" });
+    }
+
+    // Prevent multiple accounts reusing the same full name.
+    const sameNameExisting = await pool.query(
+      `SELECT id
+       FROM users
+       WHERE regexp_replace(lower(trim(full_name)), '\\s+', ' ', 'g') = $1
+       LIMIT 1`,
+      [canonicalName]
+    );
+
+    if (sameNameExisting.rows.length > 0) {
+      return res.status(409).json({
+        error: "This full name is already registered",
+      });
     }
 
     // Hash password
@@ -85,7 +119,7 @@ router.post("/register", async (req: Request, res: Response) => {
       `INSERT INTO users (full_name, email, password_hash, role)
        VALUES ($1, $2, $3, 'user')
        RETURNING id, full_name, email, role, created_at`,
-      [body.full_name, body.email.toLowerCase(), password_hash]
+      [normalizedFullName, normalizedEmail, password_hash]
     );
 
     const user = result.rows[0];
@@ -106,6 +140,15 @@ router.post("/register", async (req: Request, res: Response) => {
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ error: "Validation failed", details: err.errors });
+    }
+    if ((err as { code?: string; constraint?: string }).code === "23505") {
+      const pgErr = err as { constraint?: string };
+      if (pgErr.constraint === "users_email_unique" || pgErr.constraint === "users_email_key") {
+        return res.status(409).json({ error: "Email already registered" });
+      }
+      if (pgErr.constraint === "users_full_name_canonical_unique") {
+        return res.status(409).json({ error: "This full name is already registered" });
+      }
     }
     console.error("POST /api/auth/register error:", err);
     res.status(500).json({ error: "Internal server error" });

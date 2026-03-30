@@ -55,10 +55,16 @@ async function freePort(port: number): Promise<void> {
 app.use(
   cors({
     origin: (origin, callback) => {
+      const isDev = process.env.NODE_ENV !== "production";
+
       // Allow requests with no origin (mobile apps, curl, etc.)
       if (!origin) return callback(null, true);
       // In development, allow any localhost port
-      if (origin.match(/^http:\/\/localhost:\d+$/)) {
+      if (isDev && origin.match(/^http:\/\/(localhost|127\.0\.0\.1):\d+$/)) {
+        return callback(null, true);
+      }
+      // In development, allow private LAN IP origins (for mobile device testing).
+      if (isDev && origin.match(/^http:\/\/(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+):\d+$/)) {
         return callback(null, true);
       }
       // In production, restrict to CLIENT_URL

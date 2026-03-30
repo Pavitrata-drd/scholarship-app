@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import pool from "../db/pool.js";
 import { requireAuth } from "../middleware/auth.js";
+import { isSuspiciousRepeatedName, normalizeFullName } from "../utils/nameSecurity.js";
 
 const router = Router();
 
@@ -81,8 +82,13 @@ router.put("/", requireAuth, async (req: Request, res: Response) => {
 
     // Also update full_name if provided
     if (req.body.full_name) {
+      const normalizedName = normalizeFullName(String(req.body.full_name));
+      if (isSuspiciousRepeatedName(normalizedName)) {
+        return res.status(400).json({ error: "Please enter a valid full name" });
+      }
+
       await pool.query("UPDATE users SET full_name = $1 WHERE id = $2", [
-        req.body.full_name,
+        normalizedName,
         req.user!.id,
       ]);
     }
