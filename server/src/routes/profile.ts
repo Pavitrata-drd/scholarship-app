@@ -77,6 +77,13 @@ router.put("/", requireAuth, async (req: Request, res: Response) => {
       preferred_language,
     } = req.body;
 
+    // Get existing education level before update
+    const existingProfile = await pool.query(
+      "SELECT education_level FROM user_profiles WHERE user_id = $1",
+      [req.user!.id]
+    );
+    const previousEducationLevel = existingProfile.rows[0]?.education_level || null;
+
     // Validation: Check marks based on education level
     if (marks !== null && marks !== undefined) {
       const marksNum = Number(marks);
@@ -137,7 +144,7 @@ router.put("/", requireAuth, async (req: Request, res: Response) => {
       }
     }
 
-    // Upsert
+    // Upsert profile
     const result = await pool.query(
       `INSERT INTO user_profiles
         (user_id, education_level, category, stream, state, country,
@@ -174,6 +181,33 @@ router.put("/", requireAuth, async (req: Request, res: Response) => {
       ]
     );
 
+    // Track education level change in history
+    if (education_level && education_level !== previousEducationLevel) {
+      await pool.query(
+        `INSERT INTO education_history (user_id, education_level, changed_from)
+         VALUES ($1, $2, $3)`,
+        [req.user!.id, education_level, previousEducationLevel]
+      );
+
+      // Update the education_history_json in user_profiles
+      const historyResult = await pool.query(
+        `SELECT json_agg(json_build_object(
+           'level', education_level,
+           'changedFrom', changed_from,
+           'changedAt', changed_at
+         ) ORDER BY changed_at DESC) as history
+         FROM education_history WHERE user_id = $1`,
+        [req.user!.id]
+      );
+
+      const educationHistory = historyResult.rows[0]?.history || [];
+
+      await pool.query(
+        `UPDATE user_profiles SET education_history_json = $1 WHERE user_id = $2`,
+        [JSON.stringify(educationHistory), req.user!.id]
+      );
+    }
+
     // Also update full_name if provided
     if (req.body.full_name) {
       const normalizedName = normalizeFullName(String(req.body.full_name));
@@ -187,7 +221,10 @@ router.put("/", requireAuth, async (req: Request, res: Response) => {
       ]);
     }
 
-    res.json({ data: result.rows[0] });
+    res.json({ 
+      data: result.rows[0],
+      message: "Profile updated successfully. Scholarships recalculated based on your profile."
+    });
   } catch (err) {
     console.error("PUT /api/profile error:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -265,6 +302,100 @@ router.get("/recommendations", requireAuth, async (req: Request, res: Response) 
     res.json({ data: result.rows });
   } catch (err) {
     console.error("GET /api/profile/recommendations error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/profile/education-history — get education journey ──
+router.get("/education-history", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(
+      `SELECT education_level, changed_from, changed_at
+       FROM education_history
+       WHERE user_id = $1
+       ORDER BY changed_at DESC`,
+      [req.user!.id]
+    );
+
+    res.json({ 
+      data: result.rows,
+      message: "User's education progression history"
+    });
+  } catch (err) {
+    console.error("GET /api/profile/education-history error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/profile/eligible-scholarships — get updated eligible scholarships ──
+router.get("/eligible-scholarships", requireAuth, async (req: Request, res: Response) => {
+  try {
+    // Get user profile
+    const profileResult = await pool.query(
+      "SELECT * FROM user_profiles WHERE user_id = $1",
+      [req.user!.id]
+    );
+
+    if (profileResult.rows.length === 0) {
+      return res.json({ 
+        data: [],
+        message: "Complete your profile to see eligible scholarships"
+      });
+    }
+
+    const profile = profileResult.rows[0];
+
+    // Find matching scholarships
+    const params: (string | number)[] = [req.user!.id];
+    const conditions: string[] = [];
+
+    if (profile.education_level) {
+      conditions.push(`(education_level = $${params.length + 1} OR education_level IS NULL)`);
+      params.push(profile.education_level);
+    }
+
+    if (profile.category) {
+      conditions.push(`(category = $${params.length + 1} OR category IS NULL)`);
+      params.push(profile.category);
+    }
+
+    if (profile.state) {
+      conditions.push(`(state ILIKE $${params.length + 1} OR state IS NULL)`);
+      params.push(`%${profile.state}%`);
+    }
+
+    if (profile.stream) {
+      conditions.push(`(stream ILIKE $${params.length + 1} OR stream IS NULL)`);
+      params.push(`%${profile.stream}%`);
+    }
+
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    const result = await pool.query(
+      `SELECT s.*, 
+        CASE WHEN ss.id IS NOT NULL THEN true ELSE false END as is_saved,
+        CASE WHEN app.id IS NOT NULL THEN app.status ELSE NULL END as application_status
+       FROM scholarships s
+       LEFT JOIN saved_scholarships ss ON s.id = ss.scholarship_id AND ss.user_id = $1
+       LEFT JOIN applications app ON s.id = app.scholarship_id AND app.user_id = $1
+       ${where}
+       ORDER BY s.deadline ASC, s.amount DESC
+       LIMIT 20`,
+      params
+    );
+
+    res.json({ 
+      data: result.rows,
+      message: `Found ${result.rows.length} scholarships matching your profile`,
+      profileUsed: {
+        education_level: profile.education_level,
+        category: profile.category,
+        state: profile.state,
+        stream: profile.stream
+      }
+    });
+  } catch (err) {
+    console.error("GET /api/profile/eligible-scholarships error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

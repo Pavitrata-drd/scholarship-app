@@ -297,7 +297,7 @@ const Dashboard = () => {
 
             <div className="flex gap-3">
               <Button asChild><Link to="/scholarships" className="gap-2">Browse Scholarships <ArrowRight className="h-4 w-4" /></Link></Button>
-              <Button variant="outline" asChild><Link to="/profile" className="gap-2">Complete Profile <ChevronRight className="h-4 w-4" /></Link></Button>
+              <Button variant="outline" asChild><Link to="/profile" className="gap-2"><GraduationCap className="mr-1 h-4 w-4" /> Edit Profile <ChevronRight className="h-4 w-4" /></Link></Button>
             </div>
           </TabsContent>
 

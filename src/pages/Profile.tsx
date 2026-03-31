@@ -10,6 +10,9 @@ import {
   ArrowLeft,
   Mail,
   Shield,
+  AlertCircle,
+  CheckCircle2,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +27,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Navbar from "@/components/landing/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
@@ -32,9 +52,12 @@ import {
   updateProfile,
   sendVerifyOtp,
   verifyEmail,
+  fetchEducationHistory,
+  fetchEligibleScholarships,
   type UserProfile,
 } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { getEducationLevelDirection, getBackwardWarningMessage } from "@/lib/profileUtils";
 
 const EDUCATION_LEVELS = [
   { value: "10th", label: "10th Standard" },
@@ -110,6 +133,16 @@ const Profile = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [currentEducationLevel, setCurrentEducationLevel] = useState<string | null>(null);
+  const [showBackwardWarning, setShowBackwardWarning] = useState(false);
+  const [pendingFormUpdate, setPendingFormUpdate] = useState<typeof form | null>(null);
+  const [educationHistory, setEducationHistory] = useState<Array<{
+    education_level: string;
+    changed_from: string | null;
+    changed_at: string;
+  }> | null>(null);
+  const [eligibleScholarships, setEligibleScholarships] = useState<any[]>([]);
+  const [showEligibleScholarships, setShowEligibleScholarships] = useState(false);
 
   // Calculate age from DOB
   const calculateAge = (dobString: string): number => {
@@ -185,6 +218,7 @@ const Profile = () => {
         const p = res.data;
         if (p) {
           setEmailVerified(!!p.email_verified);
+          setCurrentEducationLevel(p.education_level || null);
           setForm({
             education_level: p.education_level || "",
             category: p.category || "",
@@ -203,12 +237,41 @@ const Profile = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Load education history on mount
+  useEffect(() => {
+    fetchEducationHistory()
+      .then((res) => {
+        if (res && res.data) {
+          setEducationHistory(res.data);
+        }
+      })
+      .catch(() => {
+        // Silently fail - education history is optional
+      });
+  }, []);
+
   const handleSave = async () => {
     if (!validateForm()) {
       toast({ title: "Validation Error", description: "Please fix the errors before saving", variant: "destructive" });
       return;
     }
 
+    // Check for backward education level movement
+    if (form.education_level && currentEducationLevel && form.education_level !== currentEducationLevel) {
+      const direction = getEducationLevelDirection(currentEducationLevel, form.education_level);
+      if (direction.isBackward) {
+        // Show warning dialog
+        setPendingFormUpdate(form);
+        setShowBackwardWarning(true);
+        return;
+      }
+    }
+
+    // Proceed with saving
+    await performSave();
+  };
+
+  const performSave = async () => {
     setSaving(true);
     try {
       await updateProfile({
@@ -223,10 +286,48 @@ const Profile = () => {
         dob: form.dob || null,
         disability: form.disability,
       } as Parameters<typeof updateProfile>[0]);
-      toast({
-        title: "Profile saved successfully!",
-        description: "Your Dashboard will now show personalized scholarship recommendations based on your profile.",
-      });
+
+      // Update the current education level after successful save
+      if (form.education_level) {
+        setCurrentEducationLevel(form.education_level);
+      }
+
+      // Fetch updated education history
+      try {
+        const historyRes = await fetchEducationHistory();
+        if (historyRes && historyRes.data) {
+          setEducationHistory(historyRes.data);
+        }
+      } catch {
+        // Continue even if history fetch fails
+      }
+
+      // Fetch recalculated eligible scholarships
+      try {
+        const scholarshipsRes = await fetchEligibleScholarships();
+        if (scholarshipsRes && scholarshipsRes.data) {
+          setEligibleScholarships(scholarshipsRes.data);
+          setShowEligibleScholarships(true);
+
+          toast({
+            title: "Profile updated successfully!",
+            description: `Scholarships recalculated based on your profile. ${scholarshipsRes.data.length} scholarship${scholarshipsRes.data.length !== 1 ? 's' : ''} match your updated profile.`,
+          });
+        } else {
+          toast({
+            title: "Profile saved successfully!",
+            description: "Your profile has been updated.",
+          });
+        }
+      } catch {
+        toast({
+          title: "Profile saved successfully!",
+          description: "Your profile has been updated. Check the dashboard for scholarship recommendations.",
+        });
+      }
+
+      setShowBackwardWarning(false);
+      setPendingFormUpdate(null);
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes("Validation Error")) {
         toast({ title: "Validation Error", description: err.message, variant: "destructive" });
@@ -519,6 +620,83 @@ const Profile = () => {
             {t("profile.save")}
           </Button>
         </div>
+
+        {/* Backward Education Level Warning Dialog */}
+        <AlertDialog open={showBackwardWarning} onOpenChange={setShowBackwardWarning}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-600" />
+                Moving Backward in Education Level
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                {currentEducationLevel && form.education_level
+                  ? getBackwardWarningMessage(currentEducationLevel, form.education_level)
+                  : "Are you sure about this change?"}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={performSave} disabled={saving}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Yes, Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Eligible Scholarships Dialog */}
+        <Dialog open={showEligibleScholarships} onOpenChange={setShowEligibleScholarships}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                Scholarships Now Available for You
+              </DialogTitle>
+              <DialogDescription>
+                Based on your updated profile, {eligibleScholarships.length} scholarship{eligibleScholarships.length !== 1 ? 's' : ''} match your qualifications
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {eligibleScholarships && eligibleScholarships.length > 0 ? (
+                eligibleScholarships.map((scholarship: any) => (
+                  <Card key={scholarship.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{scholarship.name}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{scholarship.description}</p>
+                          {scholarship.award_amount && (
+                            <div className="mt-3 flex items-center gap-1 text-green-600 font-semibold">
+                              <IndianRupee className="h-4 w-4" />
+                              {new Intl.NumberFormat("en-IN").format(scholarship.award_amount)}
+                            </div>
+                          )}
+                        </div>
+                        <Badge className="bg-green-100 text-green-800 whitespace-nowrap">
+                          <Star className="h-3 w-3 mr-1" /> Matching
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-8">No new scholarships available at this time.</p>
+              )}
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowEligibleScholarships(false)} className="flex-1">
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowEligibleScholarships(false);
+                navigate("/scholarships");
+              }} className="flex-1">
+                View All Scholarships
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

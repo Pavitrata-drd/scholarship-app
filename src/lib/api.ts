@@ -220,6 +220,38 @@ export function fetchRecommendations() {
   return apiFetch<{ data: RecommendedScholarship[] }>("/profile/recommendations");
 }
 
+// ── Education History ──────────────────────────────────────────
+
+export interface EducationHistory {
+  education_level: string;
+  changed_from: string | null;
+  changed_at: string;
+}
+
+export function fetchEducationHistory() {
+  return apiFetch<{ data: EducationHistory[]; message: string }>("/profile/education-history");
+}
+
+// ── Eligible Scholarships (recalculated after profile update) ─-
+
+export interface EligibleScholarship extends Scholarship {
+  is_saved: boolean;
+  application_status: ApplicationStatus | null;
+}
+
+export function fetchEligibleScholarships() {
+  return apiFetch<{ 
+    data: EligibleScholarship[];
+    message: string;
+    profileUsed: {
+      education_level: string | null;
+      category: string | null;
+      state: string | null;
+      stream: string | null;
+    };
+  }>("/profile/eligible-scholarships");
+}
+
 // ── Saved / Bookmark endpoints ──────────────────────────────────
 
 export interface SavedScholarship extends Scholarship {
