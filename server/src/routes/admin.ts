@@ -130,4 +130,104 @@ router.get("/users", async (req: Request, res: Response) => {
   }
 });
 
+// ── GET /api/admin/users/:userId — detailed user profile ──────
+router.get("/users/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    if (!userId) {
+      res.status(400).json({ error: "Invalid user ID" });
+      return;
+    }
+
+    // 1. User basic info
+    const userRes = await pool.query(
+      `SELECT id, full_name, email, role, email_verified, created_at FROM users WHERE id = $1`,
+      [userId]
+    );
+    
+    if (userRes.rows.length === 0) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const user = userRes.rows[0];
+
+    // 2. User profile details
+    const profileRes = await pool.query(
+      `SELECT * FROM user_profiles WHERE user_id = $1`,
+      [userId]
+    );
+    const profile = profileRes.rows[0] || null;
+
+    // 3. Saved scholarships
+    const savedRes = await pool.query(
+      `SELECT ss.id, ss.saved_at, s.id as scholarship_id, s.name, s.provider, s.amount, s.deadline
+       FROM saved_scholarships ss
+       JOIN scholarships s ON s.id = ss.scholarship_id
+       WHERE ss.user_id = $1
+       ORDER BY ss.saved_at DESC`,
+      [userId]
+    );
+
+    // 4. Applications with latest status
+    const applicationsRes = await pool.query(
+      `SELECT a.id, a.status, a.created_at, a.updated_at, a.notes,
+              s.id as scholarship_id, s.name, s.provider, s.amount
+       FROM applications a
+       JOIN scholarships s ON s.id = a.scholarship_id
+       WHERE a.user_id = $1
+       ORDER BY a.updated_at DESC`,
+      [userId]
+    );
+
+    // 5. Application timeline for all applications
+    const timelineRes = await pool.query(
+      `SELECT at.id, at.application_id, at.status, at.note, at.created_at,
+              a.scholarship_id, s.name as scholarship_name
+       FROM application_timeline at
+       JOIN applications a ON a.id = at.application_id
+       JOIN scholarships s ON s.id = a.scholarship_id
+       WHERE a.user_id = $1
+       ORDER BY at.created_at DESC`,
+      [userId]
+    );
+
+    // 6. Documents uploaded
+    const documentsRes = await pool.query(
+      `SELECT id, name, doc_type, file_size, mime_type, created_at
+       FROM documents
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    // 7. Activity summary
+    const statsRes = await pool.query(
+      `SELECT
+        (SELECT COUNT(*)::int FROM saved_scholarships WHERE user_id = $1) AS total_saved,
+        (SELECT COUNT(*)::int FROM applications WHERE user_id = $1) AS total_applications,
+        (SELECT COUNT(*)::int FROM documents WHERE user_id = $1) AS total_documents,
+        (SELECT COUNT(*)::int FROM notifications WHERE user_id = $1 AND is_read = false) AS unread_notifications
+       `,
+      [userId]
+    );
+    const stats = statsRes.rows[0];
+
+    res.json({
+      data: {
+        user,
+        profile,
+        saved_scholarships: savedRes.rows,
+        applications: applicationsRes.rows,
+        timeline: timelineRes.rows,
+        documents: documentsRes.rows,
+        stats,
+      },
+    });
+  } catch (err) {
+    console.error("GET /api/admin/users/:userId error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

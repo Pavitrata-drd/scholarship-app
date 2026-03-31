@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { UserDetailModal } from "@/components/admin/UserDetailModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -98,6 +99,8 @@ const Admin = () => {
   const [usersMeta, setUsersMeta] = useState<{ total: number; page: number; totalPages: number } | null>(null);
   const [usersPage, setUsersPage] = useState(1);
   const [deleteScholarshipId, setDeleteScholarshipId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserName, setSelectedUserName] = useState<string>("");
 
   const loadAnalytics = async () => {
     if (analytics) return; // already loaded
@@ -541,7 +544,14 @@ const Admin = () => {
                         </thead>
                         <tbody>
                           {users.map((u) => (
-                            <tr key={u.id} className="border-b hover:bg-muted/30">
+                            <tr 
+                              key={u.id} 
+                              className="border-b hover:bg-muted/50 cursor-pointer transition-colors"
+                              onClick={() => {
+                                setSelectedUserId(u.id);
+                                setSelectedUserName(u.full_name);
+                              }}
+                            >
                               <td className="p-3 text-muted-foreground">#{u.id}</td>
                               <td className="p-3 font-medium">{u.full_name}</td>
                               <td className="p-3 text-muted-foreground">{u.email}</td>
@@ -596,6 +606,17 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* User Detail Modal */}
+      <UserDetailModal
+        userId={selectedUserId}
+        userName={selectedUserName}
+        isOpen={selectedUserId !== null}
+        onClose={() => {
+          setSelectedUserId(null);
+          setSelectedUserName("");
+        }}
+      />
     </div>
   );
 };

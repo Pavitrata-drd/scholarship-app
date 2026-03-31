@@ -5,6 +5,40 @@ import { isSuspiciousRepeatedName, normalizeFullName } from "../utils/nameSecuri
 
 const router = Router();
 
+// Age limits for each education level
+const AGE_LIMITS: Record<string, { min: number; max: number }> = {
+  "10th": { min: 14, max: 17 },
+  "12th": { min: 16, max: 19 },
+  "undergraduate": { min: 17, max: 23 },
+  "postgraduate": { min: 23, max: 26 },
+  "phd": { min: 26, max: 45 },
+};
+
+// Minimum passing percentage for SCHOOL levels
+const PASSING_PERCENTAGE: Record<string, number> = {
+  "10th": 35,
+  "12th": 35,
+};
+
+// Minimum passing CGPA for COLLEGE levels (out of 10)
+const PASSING_CGPA: Record<string, number> = {
+  "undergraduate": 5.0,
+  "postgraduate": 5.0,
+  "phd": 5.0,
+};
+
+// Calculate age from DOB
+const calculateAge = (dobString: string): number => {
+  const dob = new Date(dobString);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+  return age;
+};
+
 // ── GET /api/profile — get current user's profile ──────────────
 router.get("/", requireAuth, async (req: Request, res: Response) => {
   try {
@@ -42,6 +76,66 @@ router.put("/", requireAuth, async (req: Request, res: Response) => {
       disability,
       preferred_language,
     } = req.body;
+
+    // Validation: Check marks based on education level
+    if (marks !== null && marks !== undefined) {
+      const marksNum = Number(marks);
+      const isSchoolLevel = education_level === "10th" || education_level === "12th";
+      
+      if (isSchoolLevel) {
+        // Validation for school level (Percentage: 0-100)
+        if (isNaN(marksNum) || marksNum < 0 || marksNum > 100) {
+          return res.status(400).json({ error: "Percentage must be between 0 and 100" });
+        }
+        
+        // Check minimum passing percentage
+        if (marksNum > 0 && education_level) {
+          const passingPercentage = PASSING_PERCENTAGE[education_level];
+          if (passingPercentage && marksNum < passingPercentage) {
+            const levelLabel = education_level === "10th" ? "10th Standard" : "12th Standard";
+            return res.status(400).json({ 
+              error: `You failed - minimum passing percentage for ${levelLabel} is ${passingPercentage}%` 
+            });
+          }
+        }
+      } else if (education_level) {
+        // Validation for college level (CGPA: 0-10)
+        if (isNaN(marksNum) || marksNum < 0 || marksNum > 10) {
+          return res.status(400).json({ error: "CGPA must be between 0 and 10" });
+        }
+        
+        // Check minimum passing CGPA
+        if (marksNum > 0) {
+          const passingCGPA = PASSING_CGPA[education_level];
+          if (passingCGPA && marksNum < passingCGPA) {
+            const levelLabel = 
+              education_level === "undergraduate" ? "Undergraduate" :
+              education_level === "postgraduate" ? "Postgraduate" :
+              "PhD";
+            return res.status(400).json({ 
+              error: `You failed - minimum passing CGPA for ${levelLabel} is ${passingCGPA}` 
+            });
+          }
+        }
+      }
+    }
+
+    // Validation: Check age based on education level
+    if (dob && education_level) {
+      const age = calculateAge(dob);
+      const limits = AGE_LIMITS[education_level];
+      if (limits && (age < limits.min || age > limits.max)) {
+        const levelLabel = 
+          education_level === "10th" ? "10th Standard" :
+          education_level === "12th" ? "12th Standard" :
+          education_level === "undergraduate" ? "Undergraduate" :
+          education_level === "postgraduate" ? "Postgraduate" :
+          "PhD";
+        return res.status(400).json({ 
+          error: `Age should be between ${limits.min} to ${limits.max} years for ${levelLabel}` 
+        });
+      }
+    }
 
     // Upsert
     const result = await pool.query(

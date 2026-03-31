@@ -63,6 +63,28 @@ const STATES = [
   "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi",
 ];
 
+// Age limits for each education level
+const AGE_LIMITS = {
+  "10th": { min: 14, max: 17 },
+  "12th": { min: 16, max: 19 },
+  "undergraduate": { min: 17, max: 23 },
+  "postgraduate": { min: 23, max: 26 },
+  "phd": { min: 26, max: 45 },
+};
+
+// Minimum passing percentage for each education level (SCHOOL)
+const PASSING_PERCENTAGE = {
+  "10th": 35,
+  "12th": 35,
+};
+
+// Minimum passing CGPA for each education level (COLLEGE - out of 10)
+const PASSING_CGPA = {
+  "undergraduate": 5.0,
+  "postgraduate": 5.0,
+  "phd": 5.0,
+};
+
 const Profile = () => {
   const { user, isAdmin } = useAuth();
   const { t } = useI18n();
@@ -86,6 +108,76 @@ const Profile = () => {
     dob: "",
     disability: false,
   });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Calculate age from DOB
+  const calculateAge = (dobString: string): number => {
+    const dob = new Date(dobString);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Validate form fields
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (form.dob && form.education_level) {
+      const age = calculateAge(form.dob);
+      const limits = AGE_LIMITS[form.education_level as keyof typeof AGE_LIMITS];
+      if (limits) {
+        if (age < limits.min || age > limits.max) {
+          newErrors.dob = `Age should be between ${limits.min} to ${limits.max} years for ${
+            form.education_level === "10th" ? "10th Standard" :
+            form.education_level === "12th" ? "12th Standard" :
+            form.education_level === "undergraduate" ? "Undergraduate" :
+            form.education_level === "postgraduate" ? "Postgraduate" :
+            "PhD"
+          }`;
+        }
+      }
+    }
+
+    if (form.marks && form.education_level) {
+      const marks = Number(form.marks);
+      const isSchoolLevel = form.education_level === "10th" || form.education_level === "12th";
+      
+      if (isSchoolLevel) {
+        // Validation for school level (Percentage: 0-100)
+        if (isNaN(marks) || marks < 0 || marks > 100) {
+          newErrors.marks = "Percentage must be between 0 and 100";
+        } else {
+          const passingPercentage = PASSING_PERCENTAGE[form.education_level as keyof typeof PASSING_PERCENTAGE];
+          if (passingPercentage && marks < passingPercentage) {
+            const levelLabel = form.education_level === "10th" ? "10th Standard" : "12th Standard";
+            newErrors.marks = `You failed - minimum passing percentage for ${levelLabel} is ${passingPercentage}%`;
+          }
+        }
+      } else {
+        // Validation for college level (CGPA: 0-10)
+        if (isNaN(marks) || marks < 0 || marks > 10) {
+          newErrors.marks = "CGPA must be between 0 and 10";
+        } else {
+          const passingCGPA = PASSING_CGPA[form.education_level as keyof typeof PASSING_CGPA];
+          if (passingCGPA && marks < passingCGPA) {
+            const levelLabel = 
+              form.education_level === "undergraduate" ? "Undergraduate" :
+              form.education_level === "postgraduate" ? "Postgraduate" :
+              "PhD";
+            newErrors.marks = `You failed - minimum passing CGPA for ${levelLabel} is ${passingCGPA}`;
+          }
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
     fetchProfile()
@@ -112,6 +204,11 @@ const Profile = () => {
   }, []);
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast({ title: "Validation Error", description: "Please fix the errors before saving", variant: "destructive" });
+      return;
+    }
+
     setSaving(true);
     try {
       await updateProfile({
@@ -131,7 +228,11 @@ const Profile = () => {
         description: "Your Dashboard will now show personalized scholarship recommendations based on your profile.",
       });
     } catch (err: unknown) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : "Something went wrong", variant: "destructive" });
+      if (err instanceof Error && err.message.includes("Validation Error")) {
+        toast({ title: "Validation Error", description: err.message, variant: "destructive" });
+      } else {
+        toast({ title: "Error", description: err instanceof Error ? err.message : "Something went wrong", variant: "destructive" });
+      }
     } finally {
       setSaving(false);
     }
@@ -271,8 +372,13 @@ const Profile = () => {
                 <Input
                   type="date"
                   value={form.dob}
-                  onChange={(e) => setForm({ ...form, dob: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, dob: e.target.value });
+                    setErrors({ ...errors, dob: "" });
+                  }}
+                  className={errors.dob ? "border-red-500" : ""}
                 />
+                {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob}</p>}
               </div>
             </div>
 
@@ -325,13 +431,38 @@ const Profile = () => {
                 />
               </div>
               <div>
-                <Label>Marks / Percentage</Label>
+                <Label>
+                  {form.education_level === "10th" || form.education_level === "12th" 
+                    ? "Percentage" 
+                    : form.education_level 
+                    ? "CGPA (Cumulative GPA)" 
+                    : "Marks / Percentage"}
+                </Label>
                 <Input
                   type="number"
+                  step="0.01"
                   value={form.marks}
-                  onChange={(e) => setForm({ ...form, marks: e.target.value })}
-                  placeholder="e.g., 85"
+                  onChange={(e) => {
+                    setForm({ ...form, marks: e.target.value });
+                    setErrors({ ...errors, marks: "" });
+                  }}
+                  placeholder={
+                    form.education_level === "10th" || form.education_level === "12th" 
+                      ? "e.g., 85 (0-100)" 
+                      : form.education_level 
+                      ? "e.g., 8.5 (0-10)" 
+                      : "Select education level first"
+                  }
+                  className={errors.marks ? "border-red-500" : ""}
                 />
+                {!errors.marks && form.education_level && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {form.education_level === "10th" || form.education_level === "12th" 
+                      ? "Enter your percentage (Minimum pass: 35%)" 
+                      : `Enter your CGPA on 10-point scale (Minimum pass: ${PASSING_CGPA[form.education_level as keyof typeof PASSING_CGPA]})`}
+                  </p>
+                )}
+                {errors.marks && <p className="text-red-500 text-sm mt-1">{errors.marks}</p>}
               </div>
             </div>
           </CardContent>

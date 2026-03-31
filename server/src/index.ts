@@ -80,6 +80,50 @@ app.use(
 app.use(express.json());
 
 // ── Routes ─────────────────────────────────────────────────────
+
+// Root route
+app.get("/", (_req, res) => {
+  res.type("text/html").send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>ScholarHub API</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: white; border-radius: 8px; padding: 40px; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        h1 { color: #667eea; margin-bottom: 10px; }
+        .version { color: #999; font-size: 14px; margin-bottom: 20px; }
+        .status { background: #4CAF50; color: white; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+        h2 { font-size: 18px; color: #333; margin-top: 30px; margin-bottom: 15px; }
+        .endpoint { background: #f5f5f5; padding: 12px; margin: 8px 0; border-left: 4px solid #667eea; font-family: 'Courier New', monospace; font-size: 14px; }
+        .endpoint code { color: #667eea; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>🎓 ScholarHub API Server</h1>
+        <p class="version">Version 1.0.0</p>
+        <span class="status">✓ Running</span>
+        
+        <h2>Available Endpoints:</h2>
+        <div class="endpoint"><code>/api/health</code> — Health check</div>
+        <div class="endpoint"><code>/api/auth</code> — Authentication</div>
+        <div class="endpoint"><code>/api/scholarships</code> — Scholarships</div>
+        <div class="endpoint"><code>/api/profile</code> — User profile</div>
+        <div class="endpoint"><code>/api/saved</code> — Saved scholarships</div>
+        <div class="endpoint"><code>/api/applications</code> — Applications tracker</div>
+        <div class="endpoint"><code>/api/documents</code> — Document vault</div>
+        <div class="endpoint"><code>/api/notifications</code> — Notifications</div>
+        <div class="endpoint"><code>/api/admin</code> — Admin dashboard</div>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
 });
@@ -128,3 +172,5 @@ process.on("SIGINT",  shutdown);
 process.on("exit",    () => { if (server) server.close(); });
 
 export default app;
+
+

@@ -69,6 +69,7 @@ export interface User {
   email: string;
   role: "user" | "admin";
   created_at: string;
+  email_verified: boolean;
 }
 
 export interface AuthResponse {
@@ -269,7 +270,7 @@ export interface Application {
 export interface TimelineEntry {
   id: number;
   application_id: number;
-  status: string;
+  status: ApplicationStatus;
   note: string | null;
   created_at: string;
 }
@@ -435,6 +436,63 @@ export interface AnalyticsData {
   applicationsOverTime: { date: string; count: number }[];
 }
 
+// ── User Detail Admin Types ────────────────────────────────────
+export interface AdminUserSavedScholarship {
+  id: number;
+  saved_at: string;
+  scholarship_id: number;
+  name: string;
+  provider: string;
+  amount: number;
+  deadline: string;
+}
+
+export interface AdminUserDetailApplication {
+  id: number;
+  status: ApplicationStatus;
+  created_at: string;
+  updated_at: string;
+  notes: string | null;
+  scholarship_id: number;
+  name: string;
+  provider: string;
+  amount: number;
+}
+
+export interface AdminUserDetailApplicationTimeline {
+  id: number;
+  application_id: number;
+  status: ApplicationStatus;
+  note: string | null;
+  created_at: string;
+  scholarship_id: number;
+  scholarship_name: string;
+}
+
+export interface AdminUserDetailDocument {
+  id: number;
+  name: string;
+  doc_type: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  created_at: string;
+}
+
+export interface UserDetailResponse {
+  user: User;
+  profile: UserProfile | null;
+  saved_scholarships: AdminUserSavedScholarship[];
+  applications: AdminUserDetailApplication[];
+  timeline: AdminUserDetailApplicationTimeline[];
+  documents: AdminUserDetailDocument[];
+  stats: {
+    total_saved: number;
+    total_applications: number;
+    total_documents: number;
+    unread_notifications: number;
+  };
+}
+
 export function fetchAnalytics() {
   return apiFetch<{ data: AnalyticsData }>("/admin/analytics");
 }
@@ -443,4 +501,8 @@ export function fetchAdminUsers(page = 1) {
   return apiFetch<{ data: User[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
     `/admin/users?page=${page}`
   );
+}
+
+export function fetchAdminUserDetail(userId: number) {
+  return apiFetch<{ data: UserDetailResponse }>(`/admin/users/${userId}`);
 }
